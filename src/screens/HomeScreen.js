@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { REVIEWERS } from '../data/sampleReviewers';
 
 const C = {
   bg: '#080A1C',
@@ -12,12 +13,6 @@ const C = {
   blue: '#2B7BCB',
   accent: '#6B6CFF',
 };
-
-const REVIEWERS = [
-  { id: '1', title: 'Data Structures', cards: 32, done: 80, color: '#6366F1' },
-  { id: '2', title: 'Network Security', cards: 24, done: 65, color: '#F5A84B' },
-  { id: '3', title: 'Philippine History', cards: 18, done: 42, color: '#B75DDB' },
-];
 
 function ActionCard({ color, icon, title, subtitle, glow, onPress }) {
   return (
@@ -63,7 +58,7 @@ function ReviewerRow({ item, onPress }) {
   );
 }
 
-export default function HomeScreen({ name = 'Nicole', onOpenReviewers, onUpload }) {
+export default function HomeScreen({ name = 'Nicole', onOpenReviewers, onOpenReviewer, onUpload }) {
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -98,8 +93,8 @@ export default function HomeScreen({ name = 'Nicole', onOpenReviewers, onUpload 
           </Pressable>
         </View>
         <View style={{ gap: 10 }}>
-          {REVIEWERS.map((r) => (
-            <ReviewerRow key={r.id} item={r} />
+          {REVIEWERS.slice(0, 3).map((r) => (
+            <ReviewerRow key={r.id} item={r} onPress={() => onOpenReviewer?.(r)} />
           ))}
         </View>
       </ScrollView>
