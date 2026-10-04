@@ -137,9 +137,7 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
         </Pressable>
 
         <View style={s.summaryCard}>
-          <View style={s.iconBox}>
-            <Ionicons name="book-outline" size={32} color="#1B1F3A" />
-          </View>
+          <Image source={require('../../assets/book.png')} style={s.iconBox} resizeMode="contain" />
           <View style={s.summaryTextWrap}>
             <Text style={s.summaryTitle}>Your next study session awaits</Text>
             <Text style={s.summaryText}>Notes, flashcards, and quizzes. All in one place.</Text>
@@ -318,29 +316,30 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1B1F3A',
+    borderWidth: 1,
+    borderColor: '#283052',
     borderRadius: 14,
-    paddingVertical: 18,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     marginTop: 158,
-    marginBottom: 18,
+    marginBottom: 28,
   },
   iconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#E9E3FF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 82,
+    height: 48,
+    borderRadius: 0,
+    backgroundColor: 'transparent',
     marginRight: 12,
   },
   summaryTextWrap: {
     flex: 1,
+    marginTop: 4,
   },
   summaryTitle: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   summaryText: {
     color: C.muted,
