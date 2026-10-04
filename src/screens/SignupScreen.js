@@ -42,7 +42,7 @@ function Field({
           <Ionicons
             name={leftIcon}
             size={18}
-            color={C.muted}
+            color="#7C68FF"
             style={s.inputIcon}
           />
         </View>
@@ -60,7 +60,7 @@ function Field({
 
         {rightIcon ? (
           <Pressable onPress={onRightPress} style={s.rightAction}>
-            <Ionicons name={rightIcon} size={18} color={C.muted} />
+            <Ionicons name={rightIcon} size={18} color="#7C68FF" />
           </Pressable>
         ) : null}
       </View>
@@ -272,8 +272,8 @@ const s = StyleSheet.create({
   },
   label: {
     color: C.subtext,
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "600",
     letterSpacing: 0.8,
     marginBottom: 8,
     textTransform: "uppercase",
@@ -300,7 +300,7 @@ const s = StyleSheet.create({
     flex: 1,
     height: "100%",
     color: C.text,
-    fontSize: 15,
+    fontSize: 12,
     paddingVertical: 0,
     marginLeft: 6,
   },
@@ -312,15 +312,16 @@ const s = StyleSheet.create({
   },
   helperText: {
     color: C.muted,
-    fontSize: 12,
+    fontSize: 10,
     marginTop: -4,
     marginBottom: 16,
   },
   checkboxRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 24,
+    marginTop: 20,
     marginBottom: 20,
+
   },
   checkbox: {
     width: 18,
@@ -364,7 +365,7 @@ const s = StyleSheet.create({
   },
   ctaText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: "700",
     textAlign: "center",
   },
@@ -374,9 +375,9 @@ const s = StyleSheet.create({
   },
   footerText: {
     color: C.muted,
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 70,
   },
   footerLink: {
     color: "#7C68FF",
