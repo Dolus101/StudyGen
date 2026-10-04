@@ -5,6 +5,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import SignupScreen from './src/screens/SignupScreen';
+import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import UploadScreen from './src/screens/UploadScreen';
 import ReviewerScreen from './src/screens/ReviewerScreen';
@@ -41,8 +42,8 @@ export default function App() {
   // Android back button: upload / reviewer -> main
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (screen === 'signup') {
-        setScreen('welcome');
+      if (screen === 'signup' || screen === 'login') {
+        setScreen(screen === 'login' ? 'signup' : 'welcome');
         return true;
       }
       if (screen === 'upload' || screen === 'reviewer' || screen === 'settings') {
@@ -63,7 +64,15 @@ export default function App() {
         <SignupScreen
           onBack={() => setScreen('welcome')}
           onCreateAccount={() => setScreen('main')}
-          onLogIn={() => setScreen('main')}
+          onLogIn={() => setScreen('login')}
+        />
+      )}
+
+      {screen === 'login' && (
+        <LoginScreen
+          onBack={() => setScreen('signup')}
+          onLogin={() => setScreen('main')}
+          onCreateAccount={() => setScreen('signup')}
         />
       )}
 
