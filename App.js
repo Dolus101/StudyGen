@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import WelcomeScreen from './src/screens/WelcomeScreen';
+import SignupScreen from './src/screens/SignupScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import UploadScreen from './src/screens/UploadScreen';
 import ReviewerScreen from './src/screens/ReviewerScreen';
@@ -40,6 +41,10 @@ export default function App() {
   // Android back button: upload / reviewer -> main
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (screen === 'signup') {
+        setScreen('welcome');
+        return true;
+      }
       if (screen === 'upload' || screen === 'reviewer' || screen === 'settings') {
         setScreen('main');
         return true;
@@ -52,7 +57,15 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      {screen === 'welcome' && <WelcomeScreen onGetStarted={() => setScreen('main')} />}
+      {screen === 'welcome' && <WelcomeScreen onGetStarted={() => setScreen('signup')} />}
+
+      {screen === 'signup' && (
+        <SignupScreen
+          onBack={() => setScreen('welcome')}
+          onCreateAccount={() => setScreen('main')}
+          onLogIn={() => setScreen('main')}
+        />
+      )}
 
       {screen === 'upload' && (
         <UploadScreen onBack={() => setScreen('main')} onGenerate={(opts) => console.log('Generate', opts)} />
