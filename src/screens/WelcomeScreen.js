@@ -118,7 +118,7 @@ export default function WelcomeScreen({ onGetStarted }) {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
-  container: { flex: 1, paddingHorizontal: 24, paddingBottom: 12 },
+  container: { flex: 1, paddingHorizontal: 24, paddingBottom: 56 },
 
   brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 36 },
   logo: { width: 35, aspectRatio: 242 / 234 },

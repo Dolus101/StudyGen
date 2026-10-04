@@ -12,6 +12,7 @@ import ReviewerScreen from './src/screens/ReviewerScreen';
 import ReviewersScreen from './src/screens/ReviewersScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import StatsScreen from './src/screens/StatsScreen';
 import TabBar from './src/components/TabBar';
 
 const BG = '#080A1C';
@@ -95,7 +96,7 @@ export default function App() {
             />
           )}
           {tab === 'reviewers' && <ReviewersScreen onUpload={() => setScreen('upload')} onOpenReviewer={openReviewer} />}
-          {tab === 'stats' && <Placeholder title="Stats" />}
+          {tab === 'stats' && <StatsScreen name="Nicole" onOpenReviewer={openReviewer} />}
           {tab === 'profile' && <ProfileScreen name="Nicole" onOpenReviewers={() => setTab('reviewers')} onOpenStats={() => setTab('stats')} onOpenSettings={() => setScreen('settings')} />}
           <TabBar active={tab} onChange={setTab} />
         </View>
