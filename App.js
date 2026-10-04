@@ -4,13 +4,13 @@ import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import WelcomeScreen from './src/screens/WelcomeScreen';
-import SignupScreen from './src/screens/SignupScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import UploadScreen from './src/screens/UploadScreen';
 import ReviewerScreen from './src/screens/ReviewerScreen';
 import ReviewersScreen from './src/screens/ReviewersScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import StatsScreen from './src/screens/StatsScreen';
 import TabBar from './src/components/TabBar';
 
 const BG = '#080A1C';
@@ -41,10 +41,6 @@ export default function App() {
   // Android back button: upload / reviewer -> main
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (screen === 'signup') {
-        setScreen('welcome');
-        return true;
-      }
       if (screen === 'upload' || screen === 'reviewer' || screen === 'settings') {
         setScreen('main');
         return true;
@@ -57,15 +53,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      {screen === 'welcome' && <WelcomeScreen onGetStarted={() => setScreen('signup')} />}
-
-      {screen === 'signup' && (
-        <SignupScreen
-          onBack={() => setScreen('welcome')}
-          onCreateAccount={() => setScreen('main')}
-          onLogIn={() => setScreen('main')}
-        />
-      )}
+      {screen === 'welcome' && <WelcomeScreen onGetStarted={() => setScreen('main')} />}
 
       {screen === 'upload' && (
         <UploadScreen onBack={() => setScreen('main')} onGenerate={(opts) => console.log('Generate', opts)} />
@@ -86,7 +74,7 @@ export default function App() {
             />
           )}
           {tab === 'reviewers' && <ReviewersScreen onUpload={() => setScreen('upload')} onOpenReviewer={openReviewer} />}
-          {tab === 'stats' && <Placeholder title="Stats" />}
+          {tab === 'stats' && <StatsScreen name="Nicole" onOpenReviewer={openReviewer} />}
           {tab === 'profile' && <ProfileScreen name="Nicole" onOpenReviewers={() => setTab('reviewers')} onOpenStats={() => setTab('stats')} onOpenSettings={() => setScreen('settings')} />}
           <TabBar active={tab} onChange={setTab} />
         </View>
