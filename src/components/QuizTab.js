@@ -1,36 +1,44 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { QUIZZES } from '../data/sampleReviewers';
+import { saveQuizAttempt } from '../lib/api';
 
 const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' };
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 export default function QuizTab({ r, onExit }) {
-  const quiz = QUIZZES[r.id];
+  const quiz = r.quiz;
   const [i, setI] = useState(0);
   const [sel, setSel] = useState(null);
   const [checked, setChecked] = useState(false);
-  const [score, setScore] = useState(0);
+  const [answers, setAnswers] = useState([]);
   const [done, setDone] = useState(false);
 
-  if (!quiz) return <Text style={s.muted}>No quiz yet</Text>;
+  if (!quiz || !quiz.questions.length) return <Text style={s.muted}>No quiz yet</Text>;
   const total = quiz.questions.length;
   const q = quiz.questions[i];
+  const score = answers.filter((a) => a.correct).length;
 
   const check = () => {
     if (sel === null) return;
     setChecked(true);
-    if (sel === q.answer) setScore((x) => x + 1);
+    setAnswers((a) => [...a, { topic: q.topic, correct: sel === q.answer }]);
   };
   const next = () => {
-    if (i + 1 >= total) return setDone(true);
+    if (i + 1 >= total) {
+      saveQuizAttempt({ reviewerId: r.id, score, total, answers }).catch(() => {});
+      return setDone(true);
+    }
     setI(i + 1);
     setSel(null);
     setChecked(false);
   };
   const restart = () => {
-    setI(0); setSel(null); setChecked(false); setScore(0); setDone(false);
+    setI(0);
+    setSel(null);
+    setChecked(false);
+    setAnswers([]);
+    setDone(false);
   };
 
   if (done) {

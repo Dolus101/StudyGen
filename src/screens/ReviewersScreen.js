@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { REVIEWERS } from '../data/sampleReviewers';
+import { useReviewers } from '../lib/api';
+import { EmptyState, ErrorState, Loading } from '../components/States';
 
 const C = {
   bg: '#080A1C',
@@ -38,14 +39,22 @@ function Row({ item, onPress }) {
 }
 
 export default function ReviewersScreen({ onUpload, onOpenReviewer }) {
+  const { reviewers, loading, error, reload } = useReviewers();
   const [filter, setFilter] = useState('All reviewers');
   const [query, setQuery] = useState('');
 
-  const list = REVIEWERS.filter((r) => {
+  const list = reviewers.filter((r) => {
     if (filter === 'In progress' && !(r.done > 0 && r.done < 100)) return false;
     if (filter === 'Completed' && r.done < 100) return false;
     return r.title.toLowerCase().includes(query.trim().toLowerCase());
   });
+
+  const hasAny = reviewers.length > 0;
+  const subtitle = loading
+    ? ' '
+    : hasAny
+    ? `${reviewers.length} study set${reviewers.length === 1 ? '' : 's'} · Ready when you are`
+    : 'No study sets yet';
 
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
@@ -56,45 +65,60 @@ export default function ReviewersScreen({ onUpload, onOpenReviewer }) {
             <Ionicons name="add" size={22} color="#fff" />
           </Pressable>
         </View>
-        <Text style={s.sub}>12 study sets · Ready when you are</Text>
+        <Text style={s.sub}>{subtitle}</Text>
 
-        <View style={s.search}>
-          <Ionicons name="search-outline" size={18} color={C.muted} />
-          <TextInput value={query} onChangeText={setQuery} placeholder="Search your reviewers..." placeholderTextColor={C.muted} style={s.input} />
-          <Ionicons name="options-outline" size={18} color={C.muted} />
-        </View>
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <ErrorState message={error} onRetry={reload} />
+        ) : !hasAny ? (
+          <EmptyState
+            title="No reviewers added yet"
+            text="Upload a PDF and StudyGen will turn it into notes, flashcards, and a quiz."
+            button="Upload your first PDF"
+            onPress={onUpload}
+          />
+        ) : (
+          <>
+            <View style={s.search}>
+              <Ionicons name="search-outline" size={18} color={C.muted} />
+              <TextInput value={query} onChangeText={setQuery} placeholder="Search your reviewers..." placeholderTextColor={C.muted} style={s.input} />
+              <Ionicons name="options-outline" size={18} color={C.muted} />
+            </View>
 
-        <View style={s.chips}>
-          {FILTERS.map((f) => {
-            const on = f === filter;
-            return (
-              <Pressable key={f} onPress={() => setFilter(f)} style={[s.chip, on && s.chipOn]}>
-                <Text style={[s.chipText, on && s.chipTextOn]}>{f}</Text>
+            <View style={s.chips}>
+              {FILTERS.map((f) => {
+                const on = f === filter;
+                return (
+                  <Pressable key={f} onPress={() => setFilter(f)} style={[s.chip, on && s.chipOn]}>
+                    <Text style={[s.chipText, on && s.chipTextOn]}>{f}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={s.sectionRow}>
+              <Text style={s.section}>Recent study sets</Text>
+              <Text style={s.small}>Recent first</Text>
+            </View>
+
+            <View style={{ gap: 10 }}>
+              {list.map((r) => (
+                <Row key={r.id} item={r} onPress={() => onOpenReviewer?.(r)} />
+              ))}
+              {list.length === 0 && <Text style={[s.small, { textAlign: 'center', paddingVertical: 24 }]}>No reviewers found</Text>}
+            </View>
+
+            <View style={s.cta}>
+              <Text style={s.ctaTitle}>Turn your PDF into a study set</Text>
+              <Text style={s.ctaBody}>Keep notes, flashcards and quizzes together in one reviewer.</Text>
+              <Pressable onPress={onUpload} accessibilityRole="button" style={({ pressed }) => [s.ctaBtn, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}>
+                <Ionicons name="document-text-outline" size={18} color="#fff" />
+                <Text style={s.ctaBtnText}>Upload PDF</Text>
               </Pressable>
-            );
-          })}
-        </View>
-
-        <View style={s.sectionRow}>
-          <Text style={s.section}>Recent study sets</Text>
-          <Text style={s.small}>Recent first</Text>
-        </View>
-
-        <View style={{ gap: 10 }}>
-          {list.map((r) => (
-            <Row key={r.id} item={r} onPress={() => onOpenReviewer?.(r)} />
-          ))}
-          {list.length === 0 && <Text style={[s.small, { textAlign: 'center', paddingVertical: 24 }]}>No reviewers found</Text>}
-        </View>
-
-        <View style={s.cta}>
-          <Text style={s.ctaTitle}>Turn your PDF into a study set</Text>
-          <Text style={s.ctaBody}>Keep notes, flashcards and quizzes together in one reviewer.</Text>
-          <Pressable onPress={onUpload} accessibilityRole="button" style={({ pressed }) => [s.ctaBtn, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}>
-            <Ionicons name="document-text-outline" size={18} color="#fff" />
-            <Text style={s.ctaBtnText}>Upload PDF</Text>
-          </Pressable>
-        </View>
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

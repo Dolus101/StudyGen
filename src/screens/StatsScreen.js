@@ -1,7 +1,8 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { REVIEWERS } from '../data/sampleReviewers';
+import { useReviewers } from '../lib/api';
+import { EmptyState, ErrorState, Loading } from '../components/States';
 
 const C = {
   bg: '#080A1C',
@@ -34,10 +35,12 @@ function Ring({ size = 72, stroke = 7, percent, color = C.accent, track = C.trac
   );
 }
 
-export default function StatsScreen({ name = 'Nicole', onOpenReviewer }) {
-  const current = REVIEWERS.find((r) => r.title === 'Computer Networks') || REVIEWERS[0];
-  const totalCards = REVIEWERS.reduce((sum, r) => sum + r.cards, 0);
-  const lowest = [...REVIEWERS].sort((a, b) => a.done - b.done)[0];
+export default function StatsScreen({ name = 'there', onOpenReviewer, onUpload }) {
+  const { reviewers, loading, error, reload } = useReviewers();
+
+  const current = reviewers[0]; // most recently created
+  const totalCards = reviewers.reduce((sum, r) => sum + r.cards, 0);
+  const lowest = [...reviewers].sort((a, b) => a.done - b.done)[0];
 
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
@@ -50,65 +53,85 @@ export default function StatsScreen({ name = 'Nicole', onOpenReviewer }) {
         </View>
         <Text style={s.sub}>A clear view of your reviewers, {name}.</Text>
 
-        <View style={s.hero}>
-          <Ring size={76} stroke={7} percent={current.done}>
-            <Text style={s.ringText}>{current.done}%</Text>
-          </Ring>
-          <View style={{ flex: 1 }}>
-            <Text style={s.heroTitle}>{current.title}</Text>
-            <Text style={s.muted}>
-              {current.reviewed} of {current.topics.length} topics reviewed
-            </Text>
-            <Pressable onPress={() => onOpenReviewer?.(current)} hitSlop={8}>
-              <Text style={s.link}>Continue studying →</Text>
-            </Pressable>
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <View style={{ marginTop: 20 }}>
+            <ErrorState message={error} onRetry={reload} />
           </View>
-        </View>
-
-        <View style={s.statsRow}>
-          <View style={s.stat}>
-            <Text style={s.statValue}>12</Text>
-            <Text style={s.muted}>Study sets in library</Text>
+        ) : reviewers.length === 0 ? (
+          <View style={{ marginTop: 20 }}>
+            <EmptyState
+              icon="stats-chart-outline"
+              title="No progress yet"
+              text="Your progress will show up here once you study your first reviewer."
+              button="Upload a PDF"
+              onPress={onUpload}
+            />
           </View>
-          <View style={s.stat}>
-            <Text style={s.statValue}>{totalCards}</Text>
-            <Text style={s.muted}>Flashcards in these {REVIEWERS.length} sets</Text>
-          </View>
-        </View>
-
-        <View style={s.sectionRow}>
-          <Text style={s.section}>Progress by reviewer</Text>
-          <Text style={s.small}>{REVIEWERS.length} reviewers</Text>
-        </View>
-
-        <View style={{ gap: 10 }}>
-          {REVIEWERS.map((r) => (
-            <Pressable key={r.id} onPress={() => onOpenReviewer?.(r)} style={({ pressed }) => [s.row, pressed && { opacity: 0.85 }]}>
-              <View style={s.rowTop}>
-                <Text style={s.rowTitle}>{r.title}</Text>
-                <Text style={s.rowPct}>{r.done}%</Text>
+        ) : (
+          <>
+            <View style={s.hero}>
+              <Ring size={76} stroke={7} percent={current.done}>
+                <Text style={s.ringText}>{current.done}%</Text>
+              </Ring>
+              <View style={{ flex: 1 }}>
+                <Text style={s.heroTitle}>{current.title}</Text>
+                <Text style={s.muted}>
+                  {current.reviewed} of {current.topicCount} topics reviewed
+                </Text>
+                <Pressable onPress={() => onOpenReviewer?.(current)} hitSlop={8}>
+                  <Text style={s.link}>Continue studying →</Text>
+                </Pressable>
               </View>
-              <View style={s.track}>
-                <View style={[s.fill, { width: `${r.done}%` }]} />
-              </View>
-              <Text style={[s.small, { marginTop: 8 }]}>
-                {r.cards} flashcards • {r.done}% complete
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+            </View>
 
-        <Pressable onPress={() => onOpenReviewer?.(lowest)} style={({ pressed }) => [s.tip, pressed && { opacity: 0.85 }]}>
-          <View style={s.tipIcon}>
-            <Ionicons name="sparkles-outline" size={18} color={C.accent} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.tipTitle}>Pick up where you left off</Text>
-            <Text style={s.small}>
-              Start with {lowest.title}, which is at {lowest.done}% complete, and do another review.
-            </Text>
-          </View>
-        </Pressable>
+            <View style={s.statsRow}>
+              <View style={s.stat}>
+                <Text style={s.statValue}>{reviewers.length}</Text>
+                <Text style={s.muted}>Study sets in library</Text>
+              </View>
+              <View style={s.stat}>
+                <Text style={s.statValue}>{totalCards}</Text>
+                <Text style={s.muted}>Flashcards in these {reviewers.length} sets</Text>
+              </View>
+            </View>
+
+            <View style={s.sectionRow}>
+              <Text style={s.section}>Progress by reviewer</Text>
+              <Text style={s.small}>{reviewers.length} reviewers</Text>
+            </View>
+
+            <View style={{ gap: 10 }}>
+              {reviewers.map((r) => (
+                <Pressable key={r.id} onPress={() => onOpenReviewer?.(r)} style={({ pressed }) => [s.row, pressed && { opacity: 0.85 }]}>
+                  <View style={s.rowTop}>
+                    <Text style={s.rowTitle}>{r.title}</Text>
+                    <Text style={s.rowPct}>{r.done}%</Text>
+                  </View>
+                  <View style={s.track}>
+                    <View style={[s.fill, { width: `${r.done}%` }]} />
+                  </View>
+                  <Text style={[s.small, { marginTop: 8 }]}>
+                    {r.cards} flashcards • {r.done}% complete
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable onPress={() => onOpenReviewer?.(lowest)} style={({ pressed }) => [s.tip, pressed && { opacity: 0.85 }]}>
+              <View style={s.tipIcon}>
+                <Ionicons name="sparkles-outline" size={18} color={C.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.tipTitle}>Pick up where you left off</Text>
+                <Text style={s.small}>
+                  Start with {lowest.title}, which is at {lowest.done}% complete, and do another review.
+                </Text>
+              </View>
+            </Pressable>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

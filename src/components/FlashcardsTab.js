@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { FLASHCARDS } from '../data/sampleReviewers';
 
 const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0' };
 
 export default function FlashcardsTab({ r }) {
-  const base = FLASHCARDS[r.id] || [];
+  const base = r.flashcardList || [];
   const [order, setOrder] = useState(base.map((_, i) => i));
   const [pos, setPos] = useState(0);
   const [flipped, setFlipped] = useState(false);

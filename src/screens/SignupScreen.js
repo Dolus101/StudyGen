@@ -76,6 +76,28 @@ export default function SignupScreen({ onBack, onCreateAccount, onLogIn }) {
   const [agree, setAgree] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if (!fullName.trim() || !email.trim())
+      return setError("Please enter your name and email.");
+    if (password.length < 8)
+      return setError("Password must be at least 8 characters.");
+    if (password !== confirmPassword)
+      return setError("Passwords do not match.");
+    if (!agree)
+      return setError("Please agree to the Terms and Privacy Policy.");
+    setError("");
+    setLoading(true);
+    const message = await onCreateAccount({
+      fullName: fullName.trim(),
+      email: email.trim(),
+      password,
+    });
+    setLoading(false);
+    if (message) setError(message);
+  };
 
   return (
     <SafeAreaView style={s.safe}>
@@ -169,17 +191,23 @@ export default function SignupScreen({ onBack, onCreateAccount, onLogIn }) {
           </Pressable>
         </View>
 
+        {error ? <Text style={s.error}>{error}</Text> : null}
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Create Account"
-          onPress={onCreateAccount}
+          onPress={submit}
+          disabled={loading}
           style={({ pressed }) => [
             s.cta,
+            loading && { opacity: 0.7 },
             pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
           ]}
         >
           <View style={s.ctaInner}>
-            <Text style={s.ctaText}>Create Account</Text>
+            <Text style={s.ctaText}>
+              {loading ? "Creating account…" : "Create Account"}
+            </Text>
             <Ionicons
               name="arrow-forward"
               size={18}
@@ -321,7 +349,6 @@ const s = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
     marginBottom: 20,
-
   },
   checkbox: {
     width: 18,
@@ -347,6 +374,12 @@ const s = StyleSheet.create({
   checkboxLink: {
     color: "#7C68FF",
     fontWeight: "700",
+  },
+  error: {
+    color: "#F87171",
+    fontSize: 12,
+    marginTop: -8,
+    marginBottom: 10,
   },
   cta: {
     height: 52,

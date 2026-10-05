@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useReviewers } from '../lib/api';
 
 const C = {
   bg: '#080A1C',
@@ -28,6 +29,7 @@ function Item({ icon, title, sub, onPress, last }) {
 }
 
 export default function ProfileScreen({ name = 'Nicole', onOpenReviewers, onOpenStats, onOpenSettings }) {
+  const { reviewers } = useReviewers();
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -52,7 +54,7 @@ export default function ProfileScreen({ name = 'Nicole', onOpenReviewers, onOpen
         <Pressable onPress={onOpenReviewers} style={({ pressed }) => [s.sets, pressed && { opacity: 0.85 }]}>
           <Ionicons name="book-outline" size={22} color={C.accent} />
           <View style={{ flex: 1 }}>
-            <Text style={s.setsTitle}>12 study sets</Text>
+            <Text style={s.setsTitle}>{reviewers.length} study sets</Text>
             <Text style={s.itemSub}>All your reviewers, in one place</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={C.muted} />

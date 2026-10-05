@@ -27,7 +27,7 @@ function Toggle({ value, onValueChange }) {
   return <Switch value={value} onValueChange={onValueChange} trackColor={{ false: '#2A2E55', true: C.button }} thumbColor="#fff" />;
 }
 
-export default function SettingsScreen({ onBack }) {
+export default function SettingsScreen({ onBack, onSignOut }) {
   const [goal, setGoal] = useState(1);
   const [shuffle, setShuffle] = useState(true);
   const [explain, setExplain] = useState(true);
@@ -70,7 +70,7 @@ export default function SettingsScreen({ onBack }) {
         <View style={s.group}>
           <Row icon="lock-closed-outline" title="Change password" right="chevron" onPress={() => {}} />
           <Row icon="shield-checkmark-outline" title="Privacy & data" right="chevron" onPress={() => {}} />
-          <Row icon="log-out-outline" title="Sign out" color={C.red} onPress={() => {}} />
+          <Row icon="log-out-outline" title="Sign out" color={C.red} onPress={onSignOut} />
         </View>
 
         <Text style={s.footer}>StudyGen · Your learning, your way</Text>

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { NOTES } from '../data/sampleNotes';
 
-const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', body: '#B4B8D4', accent: '#6B6CFF', button: '#5B63F0' };
+const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', body: '#B4B8D4', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399' };
 
 function Node({ icon, label, center }) {
   return (
@@ -29,8 +28,8 @@ function Diagram({ d }) {
   );
 }
 
-export default function NotesTab({ r, chapter = 0, onChapterChange }) {
-  const notes = NOTES[r.id] || [];
+export default function NotesTab({ r, chapter = 0, onChapterChange, onMarkReviewed }) {
+  const notes = r.notes || [];
   const ch = Math.min(chapter, Math.max(notes.length - 1, 0));
   const [open, setOpen] = useState(false);
   const [di, setDi] = useState(0);
@@ -40,7 +39,7 @@ export default function NotesTab({ r, chapter = 0, onChapterChange }) {
   const n = notes[ch];
   const topic = r.topics[ch];
   const diagrams = n.diagrams;
-  const diagram = diagrams[di % diagrams.length];
+  const diagram = diagrams.length ? diagrams[di % diagrams.length] : null;
   const pick = (i) => {
     onChapterChange?.(i);
     setDi(0);
@@ -64,9 +63,10 @@ export default function NotesTab({ r, chapter = 0, onChapterChange }) {
         {open && (
           <View style={s.picker}>
             {r.topics.map((t, i) => (
-              <Pressable key={t.title} onPress={() => pick(i)} style={[s.pickRow, i === ch && { backgroundColor: '#1B1F4A' }]}>
+              <Pressable key={t.id || t.title} onPress={() => pick(i)} style={[s.pickRow, i === ch && { backgroundColor: '#1B1F4A' }]}>
                 <Text style={[s.pickNum, i === ch && { color: C.accent }]}>{String(i + 1).padStart(2, '0')}</Text>
                 <Text style={[s.pickText, i === ch && { fontWeight: '700' }]} numberOfLines={1}>{t.title}</Text>
+                {t.reviewed && <Ionicons name="checkmark-circle" size={16} color={C.green} />}
               </Pressable>
             ))}
           </View>
@@ -88,33 +88,48 @@ export default function NotesTab({ r, chapter = 0, onChapterChange }) {
             </View>
           ))}
         </View>
-        <View style={s.callout}>
-          <Text style={s.calloutLabel}>{n.term.label}</Text>
-          <Text style={s.bulletText}>{n.term.text}</Text>
-        </View>
+        {n.term && n.term.label ? (
+          <View style={s.callout}>
+            <Text style={s.calloutLabel}>{n.term.label}</Text>
+            <Text style={s.bulletText}>{n.term.text}</Text>
+          </View>
+        ) : null}
       </View>
 
-      <View style={s.panel}>
-        <View style={s.panelHead}>
-          <View style={s.panelIcon}>
-            <Ionicons name="git-network-outline" size={17} color="#60A5FA" />
+      {diagram && (
+        <View style={s.panel}>
+          <View style={s.panelHead}>
+            <View style={s.panelIcon}>
+              <Ionicons name="git-network-outline" size={17} color="#60A5FA" />
+            </View>
+            <Text style={[s.panelTitle, { flex: 1 }]}>Diagrams</Text>
+            {diagrams.length > 1 && (
+              <Pressable onPress={() => step(-1)} hitSlop={8}>
+                <Ionicons name="chevron-back" size={16} color={C.muted} />
+              </Pressable>
+            )}
+            <Text style={s.muted}>{(di % diagrams.length) + 1} of {diagrams.length}</Text>
+            {diagrams.length > 1 && (
+              <Pressable onPress={() => step(1)} hitSlop={8}>
+                <Ionicons name="chevron-forward" size={16} color={C.muted} />
+              </Pressable>
+            )}
           </View>
-          <Text style={[s.panelTitle, { flex: 1 }]}>Diagrams</Text>
-          {diagrams.length > 1 && (
-            <Pressable onPress={() => step(-1)} hitSlop={8}>
-              <Ionicons name="chevron-back" size={16} color={C.muted} />
-            </Pressable>
-          )}
-          <Text style={s.muted}>{(di % diagrams.length) + 1} of {diagrams.length}</Text>
-          {diagrams.length > 1 && (
-            <Pressable onPress={() => step(1)} hitSlop={8}>
-              <Ionicons name="chevron-forward" size={16} color={C.muted} />
-            </Pressable>
-          )}
+          <Text style={s.diagramTitle}>{diagram.title}</Text>
+          <Diagram d={diagram} />
         </View>
-        <Text style={s.diagramTitle}>{diagram.title}</Text>
-        <Diagram d={diagram} />
-      </View>
+      )}
+
+      <Pressable
+        onPress={() => onMarkReviewed?.(ch)}
+        disabled={topic.reviewed}
+        style={({ pressed }) => [s.reviewBtn, topic.reviewed && s.reviewDone, pressed && { opacity: 0.85 }]}
+      >
+        <Ionicons name={topic.reviewed ? 'checkmark-circle' : 'checkmark-circle-outline'} size={18} color={topic.reviewed ? C.green : '#fff'} />
+        <Text style={[s.reviewText, topic.reviewed && { color: C.green }]}>
+          {topic.reviewed ? 'Chapter reviewed' : 'Mark chapter as reviewed'}
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -150,4 +165,8 @@ const s = StyleSheet.create({
   nodeCenter: { width: 44, height: 44, borderRadius: 22, marginTop: 6, backgroundColor: C.button, borderColor: C.button },
   nodeLabel: { color: C.muted, fontSize: 10, textAlign: 'center' },
   line: { flex: 1, height: 2, backgroundColor: '#3A3FA8', marginTop: 27 },
+
+  reviewBtn: { flexDirection: 'row', gap: 8, height: 48, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
+  reviewDone: { backgroundColor: 'rgba(52,211,153,0.12)' },
+  reviewText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

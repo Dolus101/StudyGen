@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { pickPdf } from '../lib/pickPdf';
 
 const C = {
   bg: '#080A1C',
@@ -21,7 +22,7 @@ const OPTIONS = {
   count: { title: 'Number of questions', multi: false, items: ['10 questions', '20 questions', '30 questions', '50 questions', '100 questions'] },
 };
 
-const SAMPLE_FILE = { name: 'Computer Networks.pdf', size: '5.3 MB' };
+const MAX_MB = 10;
 
 function IconButton({ name, onPress, label }) {
   return (
@@ -83,11 +84,27 @@ function OptionSheet({ config, selected, onChange, onClose }) {
 }
 
 export default function UploadScreen({ onBack, onGenerate }) {
-  const [file, setFile] = useState(SAMPLE_FILE);
+  const [file, setFile] = useState(null);
   const [lang, setLang] = useState(['English']);
   const [types, setTypes] = useState(['Multiple Choice', 'True/False', 'Identification']);
   const [count, setCount] = useState(['50 questions']);
   const [sheet, setSheet] = useState(null);
+
+  const pickFile = async () => {
+    try {
+      // pickPdf copies the PDF into the app's own storage so it can always be read later
+      const f = await pickPdf();
+      if (!f) return; // user cancelled
+      const mb = (f.size || 0) / 1024 / 1024;
+      if (mb > MAX_MB) {
+        Alert.alert('File too large', `Please choose a PDF under ${MAX_MB} MB for now.`);
+        return;
+      }
+      setFile({ uri: f.uri, name: f.name, size: `${mb.toFixed(1)} MB` });
+    } catch (e) {
+      Alert.alert('Could not open the file', e.message || 'Please try again.');
+    }
+  };
 
   const state = { lang: [lang, setLang], types: [types, setTypes], count: [count, setCount] };
 
@@ -100,13 +117,12 @@ export default function UploadScreen({ onBack, onGenerate }) {
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Drop zone (tap sets a sample file until the real picker is added) */}
-        <Pressable onPress={() => setFile(SAMPLE_FILE)} accessibilityRole="button" accessibilityLabel="Upload PDF" style={s.drop}>
+        <Pressable onPress={pickFile} accessibilityRole="button" accessibilityLabel="Upload PDF" style={s.drop}>
           <View style={s.dropIcon}>
             <Ionicons name="cloud-upload-outline" size={28} color={C.accent} />
           </View>
-          <Text style={s.dropTitle}>Tap to upload or drag & drop</Text>
-          <Text style={s.dropSub}>PDF file  •  Maximum size 25 MB</Text>
+          <Text style={s.dropTitle}>Tap to upload a PDF</Text>
+          <Text style={s.dropSub}>PDF file  •  Maximum size 10 MB</Text>
         </Pressable>
 
         {file && (
@@ -116,7 +132,7 @@ export default function UploadScreen({ onBack, onGenerate }) {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={s.fileName} numberOfLines={1}>{file.name}</Text>
-              <Text style={s.fileMeta}>{file.size}  •  Upload complete</Text>
+              <Text style={s.fileMeta}>{file.size}  •  Ready to generate</Text>
             </View>
             <Pressable onPress={() => setFile(null)} accessibilityLabel="Remove file" style={s.remove}>
               <Ionicons name="close" size={16} color={C.muted} />

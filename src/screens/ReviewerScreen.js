@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { markChapterReviewed } from '../lib/api';
 import NotesTab from '../components/NotesTab';
 import FlashcardsTab from '../components/FlashcardsTab';
 import QuizTab from '../components/QuizTab';
+import { FadeIn } from '../components/Transition';
 
 const C = {
   bg: '#080A1C',
@@ -73,16 +75,20 @@ function Overview({ r, onOpenChapter }) {
         {r.topics.map((t, i) => {
           const TIcon = t.lib === 'mci' ? MaterialCommunityIcons : Ionicons;
           return (
-          <Pressable key={t.title} onPress={() => onOpenChapter?.(i)} style={({ pressed }) => [s.topic, pressed && { opacity: 0.85 }]}>
-            <View style={s.topicIcon}>
-              <TIcon name={t.icon} size={18} color={C.accent} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.topicTitle}>{t.title}</Text>
-              <Text style={s.topicSub}>{t.concepts} key concepts</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={C.muted} />
-          </Pressable>
+            <Pressable key={t.id || t.title} onPress={() => onOpenChapter?.(i)} style={({ pressed }) => [s.topic, pressed && { opacity: 0.85 }]}>
+              <View style={s.topicIcon}>
+                <TIcon name={t.icon} size={18} color={C.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.topicTitle}>{t.title}</Text>
+                <Text style={s.topicSub}>{t.concepts} key concepts</Text>
+              </View>
+              {t.reviewed ? (
+                <Ionicons name="checkmark-circle" size={18} color={C.green} />
+              ) : (
+                <Ionicons name="chevron-forward" size={16} color={C.muted} />
+              )}
+            </Pressable>
           );
         })}
       </View>
@@ -99,6 +105,7 @@ function Overview({ r, onOpenChapter }) {
 }
 
 export default function ReviewerScreen({ reviewer, onBack }) {
+  const [data, setData] = useState(reviewer);
   const [tab, setTab] = useState('Overview');
   const [chapter, setChapter] = useState(0);
 
@@ -107,11 +114,26 @@ export default function ReviewerScreen({ reviewer, onBack }) {
     setTab('Notes');
   };
 
+  const markReviewed = async (i) => {
+    const t = data.topics[i];
+    if (!t || t.reviewed) return;
+    try {
+      await markChapterReviewed(t.id);
+      setData((prev) => {
+        const topics = prev.topics.map((x, idx) => (idx === i ? { ...x, reviewed: true } : x));
+        const reviewed = topics.filter((x) => x.reviewed).length;
+        return { ...prev, topics, reviewed, done: Math.round((reviewed / topics.length) * 100) };
+      });
+    } catch (e) {
+      Alert.alert('Could not save your progress', e.message || 'Please try again.');
+    }
+  };
+
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <IconButton name="chevron-back" label="Go back" onPress={onBack} />
-        <Text style={s.title} numberOfLines={1}>{reviewer.title}</Text>
+        <Text style={s.title} numberOfLines={1}>{data.title}</Text>
         <IconButton name="ellipsis-horizontal" label="More options" />
       </View>
 
@@ -127,20 +149,17 @@ export default function ReviewerScreen({ reviewer, onBack }) {
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {tab === 'Overview' ? (
-          <Overview r={reviewer} onOpenChapter={openChapter} />
-        ) : tab === 'Notes' ? (
-          <NotesTab r={reviewer} chapter={chapter} onChapterChange={setChapter} />
-        ) : tab === 'Flashcards' ? (
-          <FlashcardsTab r={reviewer} />
-        ) : tab === 'Quiz' ? (
-          <QuizTab r={reviewer} onExit={() => setTab('Overview')} />
-        ) : (
-          <View style={s.empty}>
-            <Text style={s.emptyTitle}>{tab}</Text>
-            <Text style={s.small}>Coming soon</Text>
-          </View>
-        )}
+        <FadeIn key={tab}>
+          {tab === 'Overview' ? (
+            <Overview r={data} onOpenChapter={openChapter} />
+          ) : tab === 'Notes' ? (
+            <NotesTab r={data} chapter={chapter} onChapterChange={setChapter} onMarkReviewed={markReviewed} />
+          ) : tab === 'Flashcards' ? (
+            <FlashcardsTab r={data} />
+          ) : (
+            <QuizTab r={data} onExit={() => setTab('Overview')} />
+          )}
+        </FadeIn>
       </ScrollView>
     </SafeAreaView>
   );
@@ -184,7 +203,4 @@ const s = StyleSheet.create({
   progress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, minHeight: 148, backgroundColor: '#0E1130', borderRadius: 18, paddingHorizontal: 18 },
   progressTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
   percent: { color: C.accent, fontSize: 22, fontWeight: '600' },
-
-  empty: { alignItems: 'center', paddingVertical: 80, gap: 6 },
-  emptyTitle: { color: C.text, fontSize: 18, fontWeight: '700' },
 });

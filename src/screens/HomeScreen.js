@@ -1,17 +1,24 @@
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { REVIEWERS } from '../data/sampleReviewers';
+import { useReviewers } from '../lib/api';
+import { EmptyState, ErrorState, Loading } from '../components/States';
 
 const C = {
   bg: '#080A1C',
-  card: '#121530',
+  card: '#12152E',
   line: '#1C2044',
   text: '#FFFFFF',
   muted: '#8E92B2',
   indigo: '#6366F1',
   blue: '#2B7BCB',
   accent: '#6B6CFF',
+};
+
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good Morning,' : h < 18 ? 'Good Afternoon,' : 'Good Evening,';
 };
 
 function ActionCard({ color, icon, title, subtitle, glow, onPress }) {
@@ -58,13 +65,20 @@ function ReviewerRow({ item, onPress }) {
   );
 }
 
-export default function HomeScreen({ name = 'Nicole', onOpenReviewers, onOpenReviewer, onUpload }) {
+export default function HomeScreen({ name = 'there', onOpenReviewers, onOpenReviewer, onUpload }) {
+  const { reviewers, loading, error, reload } = useReviewers();
+  const [query, setQuery] = useState('');
+
+  const q = query.trim().toLowerCase();
+  const list = q ? reviewers.filter((r) => r.title.toLowerCase().includes(q)) : reviewers.slice(0, 3);
+  const subtitle = loading ? ' ' : reviewers.length ? `${reviewers.length} study sets` : 'No study sets yet';
+
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
-      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={s.header}>
           <View>
-            <Text style={s.greet}>Good Evening,</Text>
+            <Text style={s.greet}>{greeting()}</Text>
             <Text style={s.name}>{name}!</Text>
           </View>
           <View style={s.avatarRing}>
@@ -76,27 +90,45 @@ export default function HomeScreen({ name = 'Nicole', onOpenReviewers, onOpenRev
 
         <View style={s.search}>
           <Ionicons name="search-outline" size={18} color={C.muted} />
-          <TextInput placeholder="Search your reviewers..." placeholderTextColor={C.muted} style={s.input} />
+          <TextInput value={query} onChangeText={setQuery} placeholder="Search your reviewers..." placeholderTextColor={C.muted} style={s.input} />
           <Ionicons name="options-outline" size={18} color={C.muted} />
         </View>
 
-        <Text style={s.section}>Jump back in</Text>
+        <Text style={[s.section, { marginTop: 24 }]}>Jump back in</Text>
         <View style={s.actions}>
           <ActionCard glow color={C.indigo} icon="cloud-upload-outline" title="Upload PDF" subtitle="Create a new reviewer" onPress={onUpload} />
-          <ActionCard color={C.blue} icon="folder-open-outline" title="My Reviewers" subtitle="12 study sets" onPress={onOpenReviewers} />
+          <ActionCard color={C.blue} icon="folder-open-outline" title="My Reviewers" subtitle={subtitle} onPress={onOpenReviewers} />
         </View>
 
         <View style={s.sectionRow}>
           <Text style={s.section}>Recent Reviewers</Text>
-          <Pressable onPress={onOpenReviewers}>
-            <Text style={s.seeAll}>See all</Text>
-          </Pressable>
+          {reviewers.length > 0 && (
+            <Pressable onPress={onOpenReviewers}>
+              <Text style={s.seeAll}>See all</Text>
+            </Pressable>
+          )}
         </View>
-        <View style={{ gap: 10 }}>
-          {REVIEWERS.slice(0, 3).map((r) => (
-            <ReviewerRow key={r.id} item={r} onPress={() => onOpenReviewer?.(r)} />
-          ))}
-        </View>
+
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <ErrorState message={error} onRetry={reload} />
+        ) : reviewers.length === 0 ? (
+          <EmptyState
+            title="No reviewers yet"
+            text="Upload a PDF and StudyGen will turn it into notes, flashcards, and a quiz."
+            button="Upload your first PDF"
+            onPress={onUpload}
+          />
+        ) : list.length === 0 ? (
+          <Text style={[s.rowMeta, { textAlign: 'center', paddingVertical: 20 }]}>No reviewers found</Text>
+        ) : (
+          <View style={{ gap: 10 }}>
+            {list.map((r) => (
+              <ReviewerRow key={r.id} item={r} onPress={() => onOpenReviewer?.(r)} />
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

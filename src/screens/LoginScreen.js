@@ -65,6 +65,16 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    setError('');
+    setLoading(true);
+    const message = await onLogin({ email: email.trim(), password });
+    setLoading(false);
+    if (message) setError(message);
+  };
 
   return (
     <SafeAreaView style={s.safe}>
@@ -123,16 +133,20 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
           </View>
         </View>
 
+        {error ? <Text style={s.error}>{error}</Text> : null}
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Log In"
-          onPress={onLogin}
+          onPress={submit}
+          disabled={loading}
           style={({ pressed }) => [
             s.cta,
+            loading && { opacity: 0.7 },
             pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
           ]}
         >
-          <Text style={s.ctaText}>Log In</Text>
+          <Text style={s.ctaText}>{loading ? 'Logging in…' : 'Log In'}</Text>
           <Ionicons name="arrow-forward" size={18} color="#fff" style={s.ctaIcon} />
         </Pressable>
 
@@ -294,6 +308,12 @@ const s = StyleSheet.create({
     color: C.link,
     fontSize: 11,
     fontWeight: '600',
+  },
+  error: {
+    color: '#F87171',
+    fontSize: 12,
+    marginTop: -16,
+    marginBottom: 12,
   },
   cta: {
     height: 52,
