@@ -113,7 +113,8 @@ export default function UploadScreen({ onBack, onGenerate }) {
       <View style={s.header}>
         <IconButton name="chevron-back" label="Go back" onPress={onBack} />
         <Text style={s.title}>Upload PDF</Text>
-        <IconButton name="ellipsis-horizontal" label="More options" />
+        {/* <IconButton name="ellipsis-horizontal" label="More options" /> */}
+        <View style={s.headerSpacer} />
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -174,6 +175,7 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 6 },
   title: { color: C.text, fontSize: 17, fontWeight: '700' },
+  headerSpacer: { width: 40, height: 40 },
   iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 20 },
 

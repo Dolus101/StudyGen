@@ -133,8 +133,8 @@ export default function ReviewerScreen({ reviewer, onBack }) {
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <IconButton name="chevron-back" label="Go back" onPress={onBack} />
-        <Text style={s.title} numberOfLines={1}>{data.title}</Text>
-        <IconButton name="ellipsis-horizontal" label="More options" />
+        <Text style={s.title}>{data.title}</Text>
+        {/* <IconButton name="ellipsis-horizontal" label="More options" /> */}
       </View>
 
       <View style={s.tabs}>
@@ -167,8 +167,8 @@ export default function ReviewerScreen({ reviewer, onBack }) {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingHorizontal: 20, paddingTop: 14 },
-  title: { flex: 1, textAlign: 'center', color: C.text, fontSize: 17, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 12, paddingHorizontal: 20, paddingTop: 14 },
+  title: { flex: 1, flexShrink: 1, textAlign: 'left', color: C.text, fontSize: 17, fontWeight: '700' },
   iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
 
   tabs: { flexDirection: 'row', gap: 6, paddingHorizontal: 20, marginTop: 16 },
