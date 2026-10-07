@@ -14,6 +14,8 @@ import GeneratingScreen from './src/screens/GeneratingScreen';
 import ReviewerScreen from './src/screens/ReviewerScreen';
 import ReviewersScreen from './src/screens/ReviewersScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen';
+import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import TabBar from './src/components/TabBar';
@@ -26,20 +28,29 @@ const BG = '#080A1C';
 const AUTH_SCREENS = ['welcome', 'login', 'signup'];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Deeper screens have a higher rank: going up slides in from the right, going down from the left.
-const RANK = { welcome: 0, login: 1, signup: 2, main: 3, upload: 4, settings: 4, generating: 5, reviewer: 6 };
+const RANK = {
+  welcome: 0,
+  login: 1,
+  signup: 2,
+  main: 3,
+  upload: 4,
+  settings: 4,
+  editprofile: 4,
+  changepassword: 4,
+  generating: 5,
+  reviewer: 6,
+};
 const TAB_ORDER = ['home', 'reviewers', 'stats', 'profile'];
 
 export default function App() {
   const [booting, setBooting] = useState(true);
   const [session, setSession] = useState(null);
-  const [screen, setScreen] = useState('welcome'); // welcome | login | signup | main | upload | generating | reviewer | settings
+  const [screen, setScreen] = useState('welcome');
   const [tab, setTab] = useState('home');
   const [reviewer, setReviewer] = useState(null);
   const [job, setJob] = useState(null);
-  const [overlay, setOverlay] = useState(null); // loading / success popup
+  const [overlay, setOverlay] = useState(null);
 
-  // Work out which way each transition should slide.
   const prevScreen = useRef(screen);
   const screenDir = useRef(1);
   if (prevScreen.current !== screen) {
@@ -55,14 +66,13 @@ export default function App() {
 
   const firstName = (session?.user?.user_metadata?.full_name || 'there').split(' ')[0];
 
-  // Load the reviewer's full content (notes, flashcards, quiz) before opening it.
   const openReviewer = async (r) => {
     setOverlay({ state: 'loading', title: 'Opening reviewer…' });
     let detail;
     try {
       detail = await fetchReviewerDetail(r.id);
     } catch (e) {
-      setOverlay(null); // close the popup first so the alert can show
+      setOverlay(null);
       Alert.alert('Could not open this reviewer', e.message || 'Please try again.');
       return;
     }
@@ -71,7 +81,6 @@ export default function App() {
     setOverlay(null);
   };
 
-  // Called when a new reviewer has finished generating.
   const openGenerated = async (id) => {
     setOverlay({ state: 'success', title: 'Your reviewer is ready!', message: 'Opening it now…' });
     let detail;
@@ -89,7 +98,6 @@ export default function App() {
     setOverlay(null);
   };
 
-  // Restore the saved session when the app opens, and listen for changes.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -103,25 +111,25 @@ export default function App() {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  // Keep the Android navigation bar hidden (a Modal can bring it back).
   useEffect(() => {
     if (Platform.OS === 'android') NavigationBar.setVisibilityAsync('hidden');
   }, [overlay]);
 
-  // Android back button
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (overlay) return true; // ignore back while a popup is showing
+      if (overlay) return true;
       if (screen === 'signup') return setScreen('login'), true;
       if (screen === 'login') return setScreen('welcome'), true;
-      if (screen === 'generating') return true; // don't leave while it's working
-      if (screen === 'upload' || screen === 'reviewer' || screen === 'settings') return setScreen('main'), true;
+      if (screen === 'generating') return true;
+      if (screen === 'upload' || screen === 'reviewer' || screen === 'editprofile')
+        return setScreen('main'), true;
+      if (screen === 'settings') return setScreen('main'), true;
+      if (screen === 'changepassword') return setScreen('settings'), true;
       return false;
     });
     return () => sub.remove();
   }, [screen, overlay]);
 
-  // Each handler returns an error message to show on the screen, or null on success.
   const handleLogin = async ({ email, password }) => {
     if (!email || !password) return 'Enter your email and password.';
     setOverlay({ state: 'loading', title: 'Logging in…' });
@@ -171,7 +179,6 @@ export default function App() {
     setScreen('welcome');
   };
 
-  // Swipe left/right to change tabs.
   const swipeTab = (step) => {
     const next = TAB_ORDER[TAB_ORDER.indexOf(tab) + step];
     if (next) setTab(next);
@@ -198,6 +205,7 @@ export default function App() {
         onOpenReviewers={() => setTab('reviewers')}
         onOpenStats={() => setTab('stats')}
         onOpenSettings={() => setScreen('settings')}
+        onEditProfile={() => setScreen('editprofile')}
       />
     );
   };
@@ -227,7 +235,26 @@ export default function App() {
       case 'settings':
         return (
           <SwipeBack key="settings" onBack={() => setScreen('main')}>
-            <SettingsScreen onBack={() => setScreen('main')} onSignOut={handleSignOut} />
+            <SettingsScreen
+              onBack={() => setScreen('main')}
+              onSignOut={handleSignOut}
+              onChangePassword={() => setScreen('changepassword')}
+            />
+          </SwipeBack>
+        );
+      case 'editprofile':
+        return (
+          <SwipeBack key="editprofile" onBack={() => setScreen('main')}>
+            <EditProfileScreen
+              onBack={() => setScreen('main')}
+              onSaved={() => setScreen('main')}
+            />
+          </SwipeBack>
+        );
+      case 'changepassword':
+        return (
+          <SwipeBack key="changepassword" onBack={() => setScreen('settings')}>
+            <ChangePasswordScreen onBack={() => setScreen('settings')} />
           </SwipeBack>
         );
       case 'reviewer':

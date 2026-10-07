@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useReviewers } from '../lib/api';
@@ -76,13 +76,27 @@ function ReviewerRow({ item, onPress, onDelete }) {
 }
 
 export default function HomeScreen({ name = 'there', onOpenReviewers, onOpenReviewer, onUpload }) {
-  const { reviewers, loading, error, reload } = useReviewers();
+  const { reviewers, loading, error, reload, remove } = useReviewers();
   const [query, setQuery] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const q = query.trim().toLowerCase();
   const list = q ? reviewers.filter((r) => r.title.toLowerCase().includes(q)) : reviewers.slice(0, 3);
   const subtitle = loading ? ' ' : reviewers.length ? `${reviewers.length} study sets` : 'No study sets yet';
+
+  const handleDelete = async () => {
+    if (!confirmingDelete) return;
+    setDeleting(true);
+    try {
+      await remove(confirmingDelete.id);
+      setConfirmingDelete(null);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Could not delete reviewer.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
@@ -141,6 +155,7 @@ export default function HomeScreen({ name = 'there', onOpenReviewers, onOpenRevi
           </View>
         )}
       </ScrollView>
+
       {confirmingDelete && (
         <Modal
           transparent
@@ -162,22 +177,27 @@ export default function HomeScreen({ name = 'there', onOpenReviewers, onOpenRevi
               </View>
               <Text style={s.confirmTitle}>Delete study set?</Text>
               <Text style={s.confirmBody}>
-                Are you sure you want to delete “{confirmingDelete.title}”?
+                Are you sure you want to delete "{confirmingDelete.title}"?
               </Text>
               <View style={s.confirmActions}>
                 <Pressable
                   onPress={() => setConfirmingDelete(null)}
+                  disabled={deleting}
                   accessibilityRole="button"
                   style={({ pressed }) => [s.cancelBtn, pressed && { opacity: 0.75 }]}
                 >
                   <Text style={s.cancelText}>Cancel</Text>
                 </Pressable>
                 <Pressable
-                  onPress={() => setConfirmingDelete(null)}
+                  onPress={handleDelete}
+                  disabled={deleting}
                   accessibilityRole="button"
-                  style={({ pressed }) => [s.confirmDeleteBtn, pressed && { opacity: 0.75 }]}
+                  style={({ pressed }) => [s.confirmDeleteBtn, (pressed || deleting) && { opacity: 0.75 }]}
                 >
-                  <Text style={s.confirmDeleteText}>Delete</Text>
+                  {deleting
+                    ? <ActivityIndicator size="small" color="#fff" />
+                    : <Text style={s.confirmDeleteText}>Delete</Text>
+                  }
                 </Pressable>
               </View>
             </View>
@@ -191,26 +211,21 @@ export default function HomeScreen({ name = 'there', onOpenReviewers, onOpenRevi
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
-
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   greet: { color: C.muted, fontSize: 13 },
   name: { color: C.text, fontSize: 21, fontWeight: '600', marginTop: 2 },
   avatarRing: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, borderColor: '#4B4FD6', alignItems: 'center', justifyContent: 'center' },
   avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: C.indigo, alignItems: 'center', justifyContent: 'center' },
-
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, borderRadius: 12, paddingHorizontal: 14, marginTop: 20, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: C.line },
   input: { flex: 1, color: C.text, fontSize: 14, padding: 0 },
-
   section: { color: C.text, fontSize: 15, fontWeight: '700' },
   sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: 12 },
   seeAll: { color: C.accent, fontSize: 13, fontWeight: '600' },
-
   actions: { flexDirection: 'row', gap: 12, marginTop: 12 },
   action: { flex: 1, height: 120, borderRadius: 18, padding: 14, justifyContent: 'space-between' },
   actionIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
   actionTitle: { color: '#fff', fontSize: 17, fontWeight: '600' },
   actionSub: { color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 },
-
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderRadius: 14, padding: 12 },
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 },
   rowIcon: { width: 44, height: 44, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },

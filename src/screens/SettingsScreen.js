@@ -27,7 +27,7 @@ function Toggle({ value, onValueChange }) {
   return <Switch value={value} onValueChange={onValueChange} trackColor={{ false: '#2A2E55', true: C.button }} thumbColor="#fff" />;
 }
 
-export default function SettingsScreen({ onBack, onSignOut }) {
+export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) {
   const [goal, setGoal] = useState(1);
   const [shuffle, setShuffle] = useState(true);
   const [explain, setExplain] = useState(true);
@@ -36,7 +36,8 @@ export default function SettingsScreen({ onBack, onSignOut }) {
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
-        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Go back" style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
+        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Go back"
+          style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
           <Ionicons name="chevron-back" size={20} color="#fff" />
         </Pressable>
         <Text style={s.title}>Settings</Text>
@@ -68,7 +69,7 @@ export default function SettingsScreen({ onBack, onSignOut }) {
 
         <Text style={s.section}>Account</Text>
         <View style={s.group}>
-          <Row icon="lock-closed-outline" title="Change password" right="chevron" onPress={() => {}} />
+          <Row icon="lock-closed-outline" title="Change password" right="chevron" onPress={onChangePassword} />
           <Row icon="shield-checkmark-outline" title="Privacy & data" right="chevron" onPress={() => {}} />
           <Row icon="log-out-outline" title="Sign out" color={C.red} onPress={onSignOut} />
         </View>

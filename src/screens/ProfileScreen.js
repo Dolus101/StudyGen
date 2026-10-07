@@ -1,7 +1,7 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useReviewers } from '../lib/api';
+import { useReviewers, useProfile } from '../lib/api';
 
 const C = {
   bg: '#080A1C',
@@ -28,25 +28,37 @@ function Item({ icon, title, sub, onPress, last }) {
   );
 }
 
-export default function ProfileScreen({ name = 'Nicole', onOpenReviewers, onOpenStats, onOpenSettings }) {
+export default function ProfileScreen({ onOpenReviewers, onOpenStats, onOpenSettings, onEditProfile }) {
   const { reviewers } = useReviewers();
+  const { profile } = useProfile();
+
+  const displayName = profile?.full_name || 'there';
+  const avatarSource = profile?.avatar_url ? { uri: profile.avatar_url } : null;
+
   return (
     <SafeAreaView edges={['top']} style={s.safe}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Text style={s.title}>Profile</Text>
-          <Pressable onPress={onOpenSettings} accessibilityRole="button" accessibilityLabel="Settings" style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
+          <Pressable onPress={onOpenSettings} accessibilityRole="button" accessibilityLabel="Settings"
+            style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
             <Ionicons name="settings-outline" size={19} color="#fff" />
           </Pressable>
         </View>
 
         <View style={s.hero}>
-          <View style={s.avatar}>
-            <Ionicons name="person-outline" size={30} color="#fff" />
+          <View style={s.avatarOuter}>
+            {avatarSource ? (
+              <Image source={avatarSource} style={s.avatarImg} />
+            ) : (
+              <View style={s.avatar}>
+                <Ionicons name="person-outline" size={30} color="#fff" />
+              </View>
+            )}
           </View>
-          <Text style={s.name}>{name}</Text>
+          <Text style={s.name}>{displayName}</Text>
           <Text style={s.tag}>Your personal study space</Text>
-          <Pressable style={({ pressed }) => [s.edit, pressed && { opacity: 0.8 }]}>
+          <Pressable onPress={onEditProfile} style={({ pressed }) => [s.edit, pressed && { opacity: 0.8 }]}>
             <Text style={s.editText}>Edit profile</Text>
           </Pressable>
         </View>
@@ -86,6 +98,8 @@ const s = StyleSheet.create({
   iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
 
   hero: { marginTop: 18, alignItems: 'center', backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#232859', borderRadius: 18, paddingVertical: 22 },
+  avatarOuter: { width: 68, height: 68, borderRadius: 34, overflow: 'hidden' },
+  avatarImg: { width: 68, height: 68, borderRadius: 34 },
   avatar: { width: 68, height: 68, borderRadius: 34, backgroundColor: C.indigo, alignItems: 'center', justifyContent: 'center' },
   name: { color: C.text, fontSize: 18, fontWeight: '700', marginTop: 12 },
   tag: { color: C.muted, fontSize: 12, marginTop: 4 },
@@ -94,6 +108,7 @@ const s = StyleSheet.create({
 
   sets: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14, backgroundColor: C.card, borderRadius: 14, padding: 16 },
   setsTitle: { color: C.text, fontSize: 16, fontWeight: '700' },
+  itemSub: { color: C.muted, fontSize: 11, marginTop: 3 },
 
   section: { color: C.text, fontSize: 14, fontWeight: '700', marginTop: 22, marginBottom: 10 },
   group: { backgroundColor: C.card, borderRadius: 14, overflow: 'hidden' },
@@ -101,7 +116,6 @@ const s = StyleSheet.create({
   itemLine: { borderBottomWidth: 1, borderBottomColor: C.line },
   itemIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center' },
   itemTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
-  itemSub: { color: C.muted, fontSize: 11, marginTop: 3 },
 
   footer: { color: C.muted, fontSize: 11, textAlign: 'center', marginTop: 26 },
 });

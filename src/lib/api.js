@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import * as FileSystem from 'expo-file-system/legacy'; // SDK 54+. On older SDKs use: 'expo-file-system'
-import * as NewFS from 'expo-file-system'; // new File API (SDK 54+); File will be undefined on older SDKs
+import * as FileSystem from 'expo-file-system/legacy';
+import * as NewFS from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
 import { supabase } from './supabase';
 
@@ -33,6 +33,16 @@ export async function fetchReviewers() {
   return data.map(mapListRow);
 }
 
+export async function deleteReviewer(id) {
+  const tables = ['quiz_attempts', 'questions', 'flashcards', 'chapters'];
+  for (const table of tables) {
+    const { error } = await supabase.from(table).delete().eq('reviewer_id', id);
+    if (error) throw error;
+  }
+  const { error } = await supabase.from('reviewers').delete().eq('id', id);
+  if (error) throw error;
+}
+
 export function useReviewers() {
   const [reviewers, setReviewers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +64,12 @@ export function useReviewers() {
     load();
   }, [load]);
 
-  return { reviewers, loading, error, reload: load };
+  const remove = useCallback(async (id) => {
+    await deleteReviewer(id);
+    setReviewers((prev) => prev.filter((r) => r.id !== id));
+  }, []);
+
+  return { reviewers, loading, error, reload: load, remove };
 }
 
 // ---------- One reviewer with everything (notes, flashcards, quiz) ----------
@@ -146,11 +161,9 @@ export async function saveQuizAttempt({ reviewerId, score, total, answers }) {
 
 // ---------- Upload and generate ----------
 
-// Tries several ways to read a local file, and reports exactly what happened if all fail.
 async function readPdfBytes(uri) {
   const errors = [];
 
-  // Diagnostics: does the file exist and how big is it?
   try {
     const info = await FileSystem.getInfoAsync(uri);
     errors.push(`info: exists=${info.exists} size=${info.size ?? '?'}`);
@@ -158,7 +171,6 @@ async function readPdfBytes(uri) {
     errors.push('info failed: ' + (e?.message || e));
   }
 
-  // 1) Legacy API (base64)
   try {
     const base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
@@ -168,7 +180,6 @@ async function readPdfBytes(uri) {
     errors.push('legacy read: ' + (e?.message || e));
   }
 
-  // 2) Copy into the app's document folder first (works for content:// and odd cache paths), then read
   try {
     const dest = FileSystem.documentDirectory + `upload-${Date.now()}.pdf`;
     await FileSystem.copyAsync({ from: uri, to: dest });
@@ -180,7 +191,6 @@ async function readPdfBytes(uri) {
     errors.push('copy+read: ' + (e?.message || e));
   }
 
-  // 3) New File API (SDK 54+)
   try {
     if (NewFS.File) {
       const bytes = await new NewFS.File(uri).bytes();
@@ -192,7 +202,6 @@ async function readPdfBytes(uri) {
     errors.push('new API: ' + (e?.message || e));
   }
 
-  // 4) Plain fetch
   try {
     const res = await fetch(uri);
     const buf = await res.arrayBuffer();
@@ -212,13 +221,9 @@ export async function uploadPdf({ uri, name, language }) {
   if (!user) throw new Error('Please sign in again.');
   if (!uri) throw new Error('No PDF file was selected.');
 
-  // Create a unique path
   const path = `${user.id}/${Date.now()}.pdf`;
-
-  // Read the PDF (throws a detailed error if every method fails)
   const body = await readPdfBytes(uri);
 
-  // Upload to storage
   const { error: uploadError } = await supabase.storage
     .from('pdfs')
     .upload(path, body, {
@@ -227,7 +232,6 @@ export async function uploadPdf({ uri, name, language }) {
     });
   if (uploadError) throw uploadError;
 
-  // Create the reviewer record
   const { data, error } = await supabase
     .from('reviewers')
     .insert({
@@ -256,7 +260,6 @@ async function generateStep(body) {
   return data;
 }
 
-// Runs the outline, then each chapter, reporting progress to the screen.
 export async function generateReviewer({ reviewerId, questionCount, onProgress }) {
   onProgress?.({ stage: 'outline', current: 0, total: 0 });
   const { chapters } = await generateStep({ reviewerId, step: 'outline' });
@@ -266,4 +269,101 @@ export async function generateReviewer({ reviewerId, questionCount, onProgress }
     onProgress?.({ stage: 'chapters', current: i, total: chapters });
     await generateStep({ reviewerId, step: 'chapter', position: i, questionsPerChapter: perChapter });
   }
+}
+
+// ---------- Profile ----------
+
+export async function fetchProfile() {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  const user = userData?.user;
+  if (!user) throw new Error('Not signed in.');
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, avatar_url')
+    .eq('id', user.id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateProfile({ fullName, avatarUri }) {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  const user = userData?.user;
+  if (!user) throw new Error('Not signed in.');
+
+  let avatar_url = null;
+
+  if (avatarUri) {
+    const ext = avatarUri.split('.').pop() || 'jpg';
+    const path = `${user.id}/avatar.${ext}`;
+
+    const base64 = await FileSystem.readAsStringAsync(avatarUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const body = decode(base64);
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, body, {
+        contentType: `image/${ext}`,
+        upsert: true,
+      });
+    if (uploadError) throw uploadError;
+
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(path);
+    avatar_url = urlData.publicUrl + '?t=' + Date.now();
+  }
+
+  // Only update fields that have a value
+  const updates = {};
+  if (fullName) updates.full_name = fullName;
+  if (avatar_url) updates.avatar_url = avatar_url;
+
+  // Nothing to update
+  if (Object.keys(updates).length === 0) return { fullName, avatar_url: null };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', user.id);
+  if (error) throw error;
+
+  return { fullName, avatar_url };
+}
+
+export function useProfile() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setProfile(await fetchProfile());
+    } catch (e) {
+      setError(e.message || 'Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const update = useCallback(async ({ fullName, avatarUri }) => {
+    const result = await updateProfile({ fullName, avatarUri });
+    setProfile((prev) => ({
+      ...prev,
+      ...(result.fullName ? { full_name: result.fullName } : {}),
+      ...(result.avatar_url ? { avatar_url: result.avatar_url } : {}),
+    }));
+    return result;
+  }, []);
+
+  return { profile, loading, error, reload: load, update };
 }
