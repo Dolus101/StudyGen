@@ -5,19 +5,22 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
 import { fetchReviewerDetail } from './src/lib/api';
-import WelcomeScreen from './src/screens/WelcomeScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import SignupScreen from './src/screens/SignupScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import UploadScreen from './src/screens/UploadScreen';
-import GeneratingScreen from './src/screens/GeneratingScreen';
-import ReviewerScreen from './src/screens/ReviewerScreen';
-import ReviewersScreen from './src/screens/ReviewersScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import EditProfileScreen from './src/screens/EditProfileScreen';
-import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
-import StatsScreen from './src/screens/StatsScreen';
+import WelcomeScreen from './src/screens/auth/WelcomeScreen';
+import LoginScreen from './src/screens/auth/LoginScreen';
+import SignupScreen from './src/screens/auth/SignupScreen';
+import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
+import VerifyCodeScreen from './src/screens/auth/VerifyCodeScreen';
+import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
+import HomeScreen from './src/screens/main/HomeScreen';
+import ReviewersScreen from './src/screens/main/ReviewersScreen';
+import StatsScreen from './src/screens/main/StatsScreen';
+import ProfileScreen from './src/screens/main/ProfileScreen';
+import ReviewerScreen from './src/screens/reviewer/ReviewerScreen';
+import GeneratingScreen from './src/screens/reviewer/GeneratingScreen';
+import SettingsScreen from './src/screens/settings/SettingsScreen';
+import ChangePasswordScreen from './src/screens/settings/ChangePasswordScreen';
+import EditProfileScreen from './src/screens/settings/EditProfileScreen';
+import UploadScreen from './src/screens/upload/UploadScreen';
 import TabBar from './src/components/TabBar';
 import StatusOverlay from './src/components/StatusOverlay';
 import Transition from './src/components/Transition';
@@ -32,6 +35,9 @@ const RANK = {
   welcome: 0,
   login: 1,
   signup: 2,
+  forgotpassword: 2,
+  verifycode: 3,
+  resetpassword: 3,
   main: 3,
   upload: 4,
   settings: 4,
@@ -50,6 +56,7 @@ export default function App() {
   const [reviewer, setReviewer] = useState(null);
   const [job, setJob] = useState(null);
   const [overlay, setOverlay] = useState(null);
+  const [resetEmail, setResetEmail] = useState('');
 
   const prevScreen = useRef(screen);
   const screenDir = useRef(1);
@@ -120,6 +127,9 @@ export default function App() {
       if (overlay) return true;
       if (screen === 'signup') return setScreen('login'), true;
       if (screen === 'login') return setScreen('welcome'), true;
+      if (screen === 'forgotpassword') return setScreen('login'), true;
+      if (screen === 'verifycode') return setScreen('forgotpassword'), true;
+      if (screen === 'resetpassword') return setScreen('verifycode'), true;
       if (screen === 'generating') return true;
       if (screen === 'upload' || screen === 'reviewer' || screen === 'editprofile')
         return setScreen('main'), true;
@@ -215,9 +225,41 @@ export default function App() {
       case 'welcome':
         return <WelcomeScreen onGetStarted={() => setScreen('login')} />;
       case 'login':
-        return <LoginScreen onBack={() => setScreen('welcome')} onLogin={handleLogin} onCreateAccount={() => setScreen('signup')} />;
+        return (
+          <LoginScreen
+            onBack={() => setScreen('welcome')}
+            onLogin={handleLogin}
+            onCreateAccount={() => setScreen('signup')}
+            onForgotPassword={() => setScreen('forgotpassword')}
+          />
+        );
       case 'signup':
         return <SignupScreen onBack={() => setScreen('login')} onCreateAccount={handleSignup} onLogIn={() => setScreen('login')} />;
+      case 'forgotpassword':
+        return (
+          <ForgotPasswordScreen
+            onBack={() => setScreen('login')}
+            onCodeSent={(email) => {
+              setResetEmail(email);
+              setScreen('verifycode');
+            }}
+          />
+        );
+      case 'verifycode':
+        return (
+          <VerifyCodeScreen
+            email={resetEmail}
+            onBack={() => setScreen('forgotpassword')}
+            onVerified={() => setScreen('resetpassword')}
+          />
+        );
+      case 'resetpassword':
+        return (
+          <ResetPasswordScreen
+            onBack={() => setScreen('verifycode')}
+            onReset={() => setScreen('login')}
+          />
+        );
       case 'upload':
         return (
           <SwipeBack key="upload" onBack={() => setScreen('main')}>

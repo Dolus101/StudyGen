@@ -42,25 +42,23 @@ function DocCard({ size, color, style }) {
 
 function Illustration() {
   const { width: W } = useWindowDimensions();
-  const H = W * 0.7;                 // illustration box height
-  const card = W * 0.235;            // document card width
-  const panelW = W * 0.564;          // rounded panel behind the book
+  const H = W * 0.7;
+  const card = W * 0.235;
+  const panelW = W * 0.564;
   const panelH = W * 0.333;
   const panelTop = H * 0.515;
-  const book = W * 0.51;             // book width
+  const book = W * 0.51;
   const bookH = book * (174 / 458);
 
   return (
     <View style={s.illoWrap}>
       <View style={{ width: W, height: H }}>
-        {/* faint outline behind everything */}
         <View
           style={{
             position: 'absolute', left: (W - panelW) / 2 - 2, width: panelW + 4, top: H * 0.14,
             height: panelTop + panelH - H * 0.14, borderRadius: W * 0.1, borderWidth: 1, borderColor: 'rgba(99,102,241,0.22)',
           }}
         />
-        {/* panel with soft purple glow */}
         <View
           style={{
             position: 'absolute', left: (W - panelW) / 2, width: panelW, top: panelTop, height: panelH,
@@ -69,7 +67,7 @@ function Illustration() {
           }}
         />
         <Image
-          source={require('../../assets/book.png')}
+          source={require('../../../assets/book.png')}
           style={{ position: 'absolute', width: book, height: bookH, left: (W - book) / 2, top: panelTop + (panelH - bookH) / 2 }}
           resizeMode="contain"
         />
@@ -85,7 +83,7 @@ export default function WelcomeScreen({ onGetStarted }) {
     <SafeAreaView style={s.safe}>
       <View style={s.container}>
         <View style={s.brandRow}>
-          <Image source={require('../../assets/logo.png')} style={s.logo} resizeMode="contain" />
+          <Image source={require('../../../assets/logo.png')} style={s.logo} resizeMode="contain" />
           <Text style={s.brandName}>
             Study<Text style={{ color: C.accent }}>Gen</Text>
           </Text>
@@ -119,19 +117,14 @@ export default function WelcomeScreen({ onGetStarted }) {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   container: { flex: 1, paddingHorizontal: 24, paddingBottom: 56 },
-
   brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 36 },
   logo: { width: 35, aspectRatio: 242 / 234 },
   brandName: { color: C.text, fontSize: 17, fontWeight: '800' },
-
-  // negative margin lets the illustration use the full screen width
   illoWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', marginHorizontal: -24, overflow: 'visible' },
-
   copy: { alignItems: 'center', marginBottom: 24 },
   title: { color: C.text, fontSize: 32, fontWeight: '800', letterSpacing: -0.5 },
   subtitle: { color: C.text, fontSize: 18, fontWeight: '500', textAlign: 'center', marginTop: 8, lineHeight: 25 },
   body: { color: C.muted, fontSize: 14, textAlign: 'center', marginTop: 12, lineHeight: 20, maxWidth: 300 },
-
   cta: { backgroundColor: C.button, borderRadius: 12, height: 48, alignItems: 'center', justifyContent: 'center' },
   ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   footer: { color: C.muted, fontSize: 11, textAlign: 'center', marginTop: 14 },

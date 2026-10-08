@@ -2,6 +2,27 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// Renders **important words** in bold. Built in here so no extra file is needed.
+function RichText({ children, style, boldStyle }) {
+  const text = typeof children === 'string' ? children : String(children ?? '');
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter((p) => p !== '');
+  return (
+    <Text style={style}>
+      {parts.map((part, i) => {
+        const isBold = part.length > 4 && part.startsWith('**') && part.endsWith('**');
+        if (isBold) {
+          return (
+            <Text key={i} style={[{ fontWeight: '800', color: '#FFFFFF' }, boldStyle]}>
+              {part.slice(2, -2)}
+            </Text>
+          );
+        }
+        return part.replace(/\*\*/g, ''); // hide any stray unmatched **
+      })}
+    </Text>
+  );
+}
+
 const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', body: '#B4B8D4', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399' };
 
 function Node({ icon, label, center }) {
@@ -63,7 +84,7 @@ export default function NotesTab({ r, chapter = 0, onChapterChange, onMarkReview
         {open && (
           <View style={s.picker}>
             {r.topics.map((t, i) => (
-              <Pressable key={t.id || t.title} onPress={() => pick(i)} style={[s.pickRow, i === ch && { backgroundColor: '#1B1F4A' }]}>
+              <Pressable key={t.id || `${i}-${t.title}`} onPress={() => pick(i)} style={[s.pickRow, i === ch && { backgroundColor: '#1B1F4A' }]}>
                 <Text style={[s.pickNum, i === ch && { color: C.accent }]}>{String(i + 1).padStart(2, '0')}</Text>
                 <Text style={[s.pickText, i === ch && { fontWeight: '700' }]} numberOfLines={1}>{t.title}</Text>
                 {t.reviewed && <Ionicons name="checkmark-circle" size={16} color={C.green} />}
@@ -81,17 +102,17 @@ export default function NotesTab({ r, chapter = 0, onChapterChange, onMarkReview
           <Text style={s.panelTitle}>Key Points</Text>
         </View>
         <View style={{ gap: 10, marginTop: 14 }}>
-          {n.points.map((p) => (
-            <View key={p} style={s.bullet}>
+          {n.points.map((p, i) => (
+            <View key={`${ch}-${i}`} style={s.bullet}>
               <View style={s.dot} />
-              <Text style={s.bulletText}>{p}</Text>
+              <RichText style={s.bulletText}>{p}</RichText>
             </View>
           ))}
         </View>
         {n.term && n.term.label ? (
           <View style={s.callout}>
             <Text style={s.calloutLabel}>{n.term.label}</Text>
-            <Text style={s.bulletText}>{n.term.text}</Text>
+            <RichText style={s.bulletText}>{n.term.text}</RichText>
           </View>
         ) : null}
       </View>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { generateReviewer, uploadPdf } from '../lib/api';
+import { generateReviewer, uploadPdf } from '../../lib/api';
 
 const C = { bg: '#080A1C', card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' };
 
@@ -26,7 +26,7 @@ function Step({ state, label }) {
 }
 
 export default function GeneratingScreen({ job, onDone, onBack }) {
-  const [stage, setStage] = useState('upload'); // upload | outline | chapters | done
+  const [stage, setStage] = useState('upload');
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState(null);
   const reviewerIdRef = useRef(null);
@@ -40,11 +40,16 @@ export default function GeneratingScreen({ job, onDone, onBack }) {
     try {
       if (!reviewerIdRef.current) {
         setStage('upload');
-        reviewerIdRef.current = await uploadPdf({ uri: job.file.uri, name: job.file.name, language: job.language });
+        reviewerIdRef.current = await uploadPdf({
+          uri: job.file.uri,
+          name: job.file.name,
+          language: job.language,
+        });
       }
       await generateReviewer({
         reviewerId: reviewerIdRef.current,
         questionCount: parseInt(job.count, 10) || 30,
+        types: job.types || ['Multiple Choice'], // ← pass types
         onProgress: (p) => {
           if (!mountedRef.current) return;
           setStage(p.stage);
@@ -64,15 +69,15 @@ export default function GeneratingScreen({ job, onDone, onBack }) {
   useEffect(() => {
     mountedRef.current = true;
     run();
-    return () => {
-      mountedRef.current = false;
-    };
-    // run once when the screen opens
+    return () => { mountedRef.current = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const percent =
-    stage === 'upload' ? 5 : stage === 'outline' ? 15 : stage === 'chapters' ? 15 + Math.round(85 * ((progress.current - 1) / Math.max(progress.total, 1))) : 100;
+    stage === 'upload' ? 5
+    : stage === 'outline' ? 15
+    : stage === 'chapters' ? 15 + Math.round(85 * ((progress.current - 1) / Math.max(progress.total, 1)))
+    : 100;
 
   const state = (name) => {
     const order = ['upload', 'outline', 'chapters', 'done'];

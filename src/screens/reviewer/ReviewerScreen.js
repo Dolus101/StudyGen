@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { markChapterReviewed } from '../lib/api';
-import NotesTab from '../components/NotesTab';
-import FlashcardsTab from '../components/FlashcardsTab';
-import QuizTab from '../components/QuizTab';
-import { FadeIn } from '../components/Transition';
+import { markChapterReviewed } from '../../lib/api';
+import NotesTab from '../../components/NotesTab';
+import FlashcardsTab from '../../components/FlashcardsTab';
+import QuizTab from '../../components/QuizTab';
+import { FadeIn } from '../../components/Transition';
 
 const C = {
   bg: '#080A1C',

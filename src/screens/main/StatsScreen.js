@@ -1,8 +1,8 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useReviewers } from '../lib/api';
-import { EmptyState, ErrorState, Loading } from '../components/States';
+import { useReviewers } from '../../lib/api';
+import { EmptyState, ErrorState, Loading } from '../../components/States';
 
 const C = {
   bg: '#080A1C',

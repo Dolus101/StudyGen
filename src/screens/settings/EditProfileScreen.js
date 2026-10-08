@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import { useProfile } from '../lib/api';
+import { useProfile } from '../../lib/api';
 
 const C = {
   bg: '#080A1C',

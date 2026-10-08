@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useReviewers, useProfile } from '../lib/api';
+import { useReviewers, useProfile } from '../../lib/api';
 
 const C = {
   bg: '#080A1C',

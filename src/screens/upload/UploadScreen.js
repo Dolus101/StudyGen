@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { pickPdf } from '../lib/pickPdf';
+import { pickPdf } from '../../lib/pickPdf';
 
 const C = {
   bg: '#080A1C',

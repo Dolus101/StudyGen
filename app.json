@@ -4,8 +4,20 @@
     "slug": "StudyGen",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon-logo.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "dark",
+    "backgroundColor": "#080A1C",
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#080A1C"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -13,8 +25,7 @@
       "package": "com.gembie.studygen",
       "adaptiveIcon": {
         "backgroundColor": "#080A1C",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/logo.png"
       }
     },
     "web": {

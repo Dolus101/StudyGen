@@ -38,7 +38,6 @@ function Field({
             style={s.inputIcon}
           />
         </View>
-
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -49,7 +48,6 @@ function Field({
           secureTextEntry={secureTextEntry}
           style={s.input}
         />
-
         {rightIcon ? (
           <Pressable onPress={onRightPress} style={s.rightAction}>
             <Ionicons name={rightIcon} size={18} color="#7C68FF" />
@@ -60,7 +58,7 @@ function Field({
   );
 }
 
-export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
+export default function LoginScreen({ onBack, onLogin, onCreateAccount, onForgotPassword }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -80,17 +78,11 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
     <SafeAreaView style={s.safe}>
       <View style={s.container}>
         <View style={s.topBar}>
-          <Pressable
-            onPress={onBack}
-            style={s.backButton}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
+          <Pressable onPress={onBack} style={s.backButton} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="chevron-back" size={18} color={C.text} />
           </Pressable>
-
           <View style={s.brandRow}>
-            <Image source={require('../../assets/logo.png')} style={s.logo} resizeMode="contain" />
+            <Image source={require('../../../assets/logo.png')} style={s.logo} resizeMode="contain" />
             <Text style={s.brandName}>
               Study<Text style={{ color: C.accent }}>Gen</Text>
             </Text>
@@ -110,7 +102,6 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
             onChangeText={setEmail}
             keyboardType="email-address"
           />
-
           <Field
             label="PASSWORD"
             placeholder="Enter your password"
@@ -120,7 +111,6 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
             rightIcon={showPassword ? 'eye-off-outline' : 'eye-outline'}
             onRightPress={() => setShowPassword((value) => !value)}
           />
-
           <View style={s.metaRow}>
             <Pressable onPress={() => setRememberMe((value) => !value)} style={s.rememberRow}>
               <View style={[s.checkbox, rememberMe && s.checkboxChecked]}>
@@ -128,8 +118,9 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
               </View>
               <Text style={s.rememberText}>Remember me</Text>
             </Pressable>
-
-            <Text style={s.forgotText}>Forgot password?</Text>
+            <Pressable onPress={onForgotPassword}>
+              <Text style={s.forgotText}>Forgot password?</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -151,7 +142,7 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
         </Pressable>
 
         <View style={s.summaryCard}>
-          <Image source={require('../../assets/book.png')} style={s.iconBox} resizeMode="contain" />
+          <Image source={require('../../../assets/book.png')} style={s.iconBox} resizeMode="contain" />
           <View style={s.summaryTextWrap}>
             <Text style={s.summaryTitle}>Your next study session awaits</Text>
             <Text style={s.summaryText}>Notes, flashcards, and quizzes. All in one place.</Text>
@@ -160,9 +151,7 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
 
         <Text style={s.footerText}>
           New to StudyGen?{' '}
-          <Text onPress={onCreateAccount} style={s.footerLink}>
-            Create an account
-          </Text>
+          <Text onPress={onCreateAccount} style={s.footerLink}>Create an account</Text>
         </Text>
       </View>
     </SafeAreaView>
@@ -170,209 +159,38 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount }) {
 }
 
 const s = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    backgroundColor: C.bg,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    marginBottom: 12,
-    minHeight: 34,
-    position: 'relative',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 0,
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#171D3B',
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    justifyContent: 'center',
-  },
-  logo: {
-    width: 26,
-    height: 42.78,
-  },
-  brandName: {
-    color: C.text,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  title: {
-    color: C.text,
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -1,
-    marginTop: 26,
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: C.muted,
-    fontSize: 13,
-    lineHeight: 20,
-    marginBottom: 28,
-  },
-  form: {
-    width: '100%',
-  },
-  fieldWrap: {
-    marginBottom: 20,
-  },
-  label: {
-    color: C.subtext,
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.input,
-    borderWidth: 1,
-    borderColor: C.inputBorder,
-    borderRadius: 12,
-    height: 48,
-    paddingHorizontal: 16,
-  },
-  inputLeft: {
-    width: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputIcon: {
-    marginRight: 4,
-  },
-  input: {
-    flex: 1,
-    height: '100%',
-    color: C.text,
-    fontSize: 12,
-    paddingVertical: 0,
-    marginLeft: 6,
-  },
-  rightAction: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 4,
-    marginBottom: 28,
-  },
-  rememberRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#7B82B8',
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  checkboxChecked: {
-    backgroundColor: C.button,
-    borderColor: C.button,
-  },
-  rememberText: {
-    color: C.subtext,
-    fontSize: 11,
-  },
-  forgotText: {
-    color: C.link,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  error: {
-    color: '#F87171',
-    fontSize: 12,
-    marginTop: -16,
-    marginBottom: 12,
-  },
-  cta: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: C.button,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  ctaText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  ctaIcon: {
-    marginLeft: 8,
-  },
-  summaryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1B1F3A',
-    borderWidth: 1,
-    borderColor: '#283052',
-    borderRadius: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginTop: 158,
-    marginBottom: 28,
-  },
-  iconBox: {
-    width: 82,
-    height: 48,
-    borderRadius: 0,
-    backgroundColor: 'transparent',
-    marginRight: 12,
-  },
-  summaryTextWrap: {
-    flex: 1,
-    marginTop: 4,
-  },
-  summaryTitle: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 5,
-  },
-  summaryText: {
-    color: C.muted,
-    fontSize: 10,
-    lineHeight: 18,
-  },
-  footerText: {
-    color: C.muted,
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  footerLink: {
-    color: C.link,
-    fontWeight: '700',
-  },
+  safe: { flex: 1, backgroundColor: C.bg },
+  container: { flex: 1, paddingHorizontal: 24, backgroundColor: C.bg },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, marginBottom: 12, minHeight: 34, position: 'relative' },
+  backButton: { position: 'absolute', left: 0, width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: '#171D3B' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center' },
+  logo: { width: 26, height: 42.78 },
+  brandName: { color: C.text, fontSize: 20, fontWeight: '800', letterSpacing: -0.5 },
+  title: { color: C.text, fontSize: 28, fontWeight: '800', letterSpacing: -1, marginTop: 26, marginBottom: 8 },
+  subtitle: { color: C.muted, fontSize: 13, lineHeight: 20, marginBottom: 28 },
+  form: { width: '100%' },
+  fieldWrap: { marginBottom: 20 },
+  label: { color: C.subtext, fontSize: 10, fontWeight: '600', letterSpacing: 0.8, marginBottom: 8, textTransform: 'uppercase' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.input, borderWidth: 1, borderColor: C.inputBorder, borderRadius: 12, height: 48, paddingHorizontal: 16 },
+  inputLeft: { width: 22, alignItems: 'center', justifyContent: 'center' },
+  inputIcon: { marginRight: 4 },
+  input: { flex: 1, height: '100%', color: C.text, fontSize: 12, paddingVertical: 0, marginLeft: 6 },
+  rightAction: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, marginBottom: 28 },
+  rememberRow: { flexDirection: 'row', alignItems: 'center' },
+  checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 1, borderColor: '#7B82B8', backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
+  checkboxChecked: { backgroundColor: C.button, borderColor: C.button },
+  rememberText: { color: C.subtext, fontSize: 11 },
+  forgotText: { color: C.link, fontSize: 11, fontWeight: '600' },
+  error: { color: '#F87171', fontSize: 12, marginTop: -16, marginBottom: 12 },
+  cta: { height: 52, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' },
+  ctaText: { color: '#fff', fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  ctaIcon: { marginLeft: 8 },
+  summaryCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1B1F3A', borderWidth: 1, borderColor: '#283052', borderRadius: 14, paddingVertical: 16, paddingHorizontal: 16, marginTop: 158, marginBottom: 28 },
+  iconBox: { width: 82, height: 48, borderRadius: 0, backgroundColor: 'transparent', marginRight: 12 },
+  summaryTextWrap: { flex: 1, marginTop: 4 },
+  summaryTitle: { color: '#fff', fontSize: 12, fontWeight: '700', marginBottom: 5 },
+  summaryText: { color: C.muted, fontSize: 10, lineHeight: 18 },
+  footerText: { color: C.muted, fontSize: 12, textAlign: 'center' },
+  footerLink: { color: C.link, fontWeight: '700' },
 });
