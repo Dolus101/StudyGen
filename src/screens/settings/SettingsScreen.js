@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { cancelStudyReminder, useStudyReminder } from '../../hooks/useStudyReminder';
+import { useSettings } from '../../hooks/useSettings';
 
 const C = { bg: '#080A1C', card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', red: '#F4707F' };
-const GOALS = [10, 15, 20, 30, 45];
 
 function Row({ icon, title, sub, value, onPress, right, color }) {
   return (
@@ -27,11 +29,31 @@ function Toggle({ value, onValueChange }) {
   return <Switch value={value} onValueChange={onValueChange} trackColor={{ false: '#2A2E55', true: C.button }} thumbColor="#fff" />;
 }
 
+function toDate({ hour, minute }) {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d;
+}
+
 export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) {
-  const [goal, setGoal] = useState(1);
-  const [shuffle, setShuffle] = useState(true);
-  const [explain, setExplain] = useState(true);
-  const [remind, setRemind] = useState(true);
+  const { shuffle, explain, update } = useSettings();
+
+  // Study reminder (local notification)
+  const { enabled: remind, time, toggle: setRemind, changeTime } = useStudyReminder();
+  const [showPicker, setShowPicker] = useState(false);
+  const [draftTime, setDraftTime] = useState(new Date()); // iOS: holds the spinner value until "Done"
+
+  const timeLabel = toDate(time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  const openPicker = () => {
+    setDraftTime(toDate(time));
+    setShowPicker(true);
+  };
+
+  const handleSignOut = async () => {
+    await cancelStudyReminder();
+    onSignOut?.();
+  };
 
   return (
     <SafeAreaView style={s.safe}>
@@ -51,15 +73,26 @@ export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) 
 
         <Text style={s.section}>Study preferences</Text>
         <View style={s.group}>
-          <Row icon="radio-button-on-outline" title="Daily study goal" value={`${GOALS[goal]} minutes`} right="chevron" onPress={() => setGoal((g) => (g + 1) % GOALS.length)} />
-          <Row icon="shuffle" title="Shuffle flashcards" sub="Mix card order when starting a deck" right={<Toggle value={shuffle} onValueChange={setShuffle} />} />
-          <Row icon="bulb-outline" title="Quiz explanations" sub="Show explanations after checking answers." right={<Toggle value={explain} onValueChange={setExplain} />} />
+          <Row icon="shuffle" title="Shuffle flashcards" sub="Mix card order when starting a deck" right={<Toggle value={shuffle} onValueChange={(v) => update({ shuffle: v })} />} />
+          <Row icon="bulb-outline" title="Quiz explanations" sub="Show explanations after checking answers." right={<Toggle value={explain} onValueChange={(v) => update({ explain: v })} />} />
         </View>
 
         <Text style={s.section}>Notifications</Text>
         <View style={s.group}>
-          <Row icon="notifications-outline" title="Study reminders" sub="A gentle nudge to keep learning" right={<Toggle value={remind} onValueChange={setRemind} />} />
-          <Row icon="time-outline" title="Reminder time" value="7:00 PM" right="chevron" onPress={() => {}} />
+          <Row
+            icon="notifications-outline"
+            title="Study reminders"
+            sub="A gentle nudge to keep learning"
+            right={<Toggle value={remind} onValueChange={setRemind} />}
+          />
+          <Row
+            icon="time-outline"
+            title="Reminder time"
+            sub={remind ? undefined : 'Turn on study reminders to set a time'}
+            value={timeLabel}
+            right="chevron"
+            onPress={remind ? openPicker : undefined}
+          />
         </View>
 
         <Text style={s.section}>Appearance</Text>
@@ -71,11 +104,56 @@ export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) 
         <View style={s.group}>
           <Row icon="lock-closed-outline" title="Change password" right="chevron" onPress={onChangePassword} />
           <Row icon="shield-checkmark-outline" title="Privacy & data" right="chevron" onPress={() => {}} />
-          <Row icon="log-out-outline" title="Sign out" color={C.red} onPress={onSignOut} />
+          <Row icon="log-out-outline" title="Sign out" color={C.red} onPress={handleSignOut} />
         </View>
 
         <Text style={s.footer}>StudyGen · Your learning, your way</Text>
       </ScrollView>
+
+      {/* Android: native time dialog. It closes itself, so just handle the result. */}
+      {showPicker && Platform.OS === 'android' && (
+        <DateTimePicker
+          mode="time"
+          value={toDate(time)}
+          display="default"
+          onChange={(event, date) => {
+            setShowPicker(false);
+            if (event.type === 'set' && date) changeTime(date.getHours(), date.getMinutes());
+          }}
+        />
+      )}
+
+      {/* iOS: spinner inside a bottom sheet with Cancel / Done */}
+      {Platform.OS === 'ios' && (
+        <Modal visible={showPicker} transparent animationType="slide" onRequestClose={() => setShowPicker(false)}>
+          <Pressable style={s.backdrop} onPress={() => setShowPicker(false)} />
+          <View style={s.sheet}>
+            <View style={s.sheetHeader}>
+              <Pressable onPress={() => setShowPicker(false)} hitSlop={10}>
+                <Text style={s.sheetCancel}>Cancel</Text>
+              </Pressable>
+              <Text style={s.sheetTitle}>Reminder time</Text>
+              <Pressable
+                onPress={() => {
+                  changeTime(draftTime.getHours(), draftTime.getMinutes());
+                  setShowPicker(false);
+                }}
+                hitSlop={10}
+              >
+                <Text style={s.sheetDone}>Done</Text>
+              </Pressable>
+            </View>
+            <DateTimePicker
+              mode="time"
+              value={draftTime}
+              display="spinner"
+              themeVariant="dark"
+              textColor="#fff"
+              onChange={(_, date) => date && setDraftTime(date)}
+            />
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -95,4 +173,12 @@ const s = StyleSheet.create({
   rowSub: { color: C.muted, fontSize: 11, marginTop: 2 },
   value: { color: C.muted, fontSize: 12 },
   footer: { color: C.muted, fontSize: 11, textAlign: 'center', marginTop: 28 },
+
+  // iOS time picker sheet
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  sheet: { backgroundColor: C.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 30 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: C.line },
+  sheetTitle: { color: C.text, fontSize: 15, fontWeight: '700' },
+  sheetCancel: { color: C.muted, fontSize: 15 },
+  sheetDone: { color: C.accent, fontSize: 15, fontWeight: '700' },
 });

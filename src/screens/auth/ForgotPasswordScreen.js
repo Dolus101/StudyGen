@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
+
+const REDIRECT_URL = 'studygen://reset-password';
 
 const C = {
   bg: '#080A1C',
@@ -16,8 +19,43 @@ const C = {
   link: '#7C68FF',
 };
 
-export default function ForgotPasswordScreen({ onBack, onCodeSent }) {
+export default function ForgotPasswordScreen({ onBack }) {
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const handleSend = async () => {
+    if (loading || cooldown > 0) return;
+    const trimmed = email.trim();
+    if (!trimmed) {
+      Alert.alert('Email required', 'Please enter your email address.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
+        redirectTo: REDIRECT_URL,
+      });
+      if (error) throw error;
+      setSent(true);
+      setCooldown(60);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Could not send the reset link. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const buttonLabel = cooldown > 0
+    ? `Resend link in ${cooldown}s`
+    : sent ? 'Resend link' : 'Send reset link';
 
   return (
     <SafeAreaView style={s.safe}>
@@ -34,13 +72,15 @@ export default function ForgotPasswordScreen({ onBack, onCodeSent }) {
 
         <View style={s.iconWrap}>
           <View style={s.iconCircle}>
-            <Ionicons name="lock-open-outline" size={32} color={C.accent} />
+            <Ionicons name={sent ? 'mail-open-outline' : 'lock-open-outline'} size={32} color={C.accent} />
           </View>
         </View>
 
-        <Text style={s.title}>Forgot password?</Text>
+        <Text style={s.title}>{sent ? 'Check your email' : 'Forgot password?'}</Text>
         <Text style={s.subtitle}>
-          No worries! Enter your email address and we'll send you a verification code to reset your password.
+          {sent
+            ? <>We sent a password reset link to <Text style={{ color: C.accent, fontWeight: '700' }}>{email.trim()}</Text>. Open the email on this phone and tap the link to set a new password.</>
+            : "No worries! Enter your email address and we'll send you a link to reset your password."}
         </Text>
 
         <View style={s.fieldWrap}>
@@ -54,17 +94,30 @@ export default function ForgotPasswordScreen({ onBack, onCodeSent }) {
               placeholderTextColor={C.muted}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
               style={s.input}
+              returnKeyType="done"
+              onSubmitEditing={handleSend}
             />
           </View>
         </View>
 
         <Pressable
-          onPress={() => onCodeSent?.(email.trim())}
-          style={({ pressed }) => [s.cta, pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] }]}
+          onPress={handleSend}
+          disabled={loading || cooldown > 0}
+          style={({ pressed }) => [
+            s.cta,
+            (loading || cooldown > 0) && { opacity: 0.6 },
+            pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+          ]}
         >
-          <Text style={s.ctaText}>Send verification code</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+          {loading
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <>
+                <Text style={s.ctaText}>{buttonLabel}</Text>
+                {cooldown === 0 && <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />}
+              </>
+          }
         </Pressable>
 
         <View style={s.infoCard}>

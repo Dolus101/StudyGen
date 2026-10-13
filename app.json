@@ -2,6 +2,7 @@
   "expo": {
     "name": "StudyGen",
     "slug": "StudyGen",
+    "scheme": "studygen",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -15,6 +16,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#080A1C"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "color": "#5B63F0"
         }
       ]
     ],
@@ -36,5 +44,6 @@
         "projectId": "afb7283f-ca14-4aad-8eec-cbea783f20d4"
       }
     }
+    
   }
 }

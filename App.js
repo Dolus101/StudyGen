@@ -9,7 +9,6 @@ import WelcomeScreen from './src/screens/auth/WelcomeScreen';
 import LoginScreen from './src/screens/auth/LoginScreen';
 import SignupScreen from './src/screens/auth/SignupScreen';
 import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
-import VerifyCodeScreen from './src/screens/auth/VerifyCodeScreen';
 import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
 import HomeScreen from './src/screens/main/HomeScreen';
 import ReviewersScreen from './src/screens/main/ReviewersScreen';
@@ -26,6 +25,8 @@ import StatusOverlay from './src/components/StatusOverlay';
 import Transition from './src/components/Transition';
 import SwipeBack from './src/components/SwipeBack';
 import SwipeTabs from './src/components/SwipeTabs';
+import useResetPasswordLink from './src/hooks/useResetPasswordLink';
+import './src/notificationSetup';
 
 const BG = '#080A1C';
 const AUTH_SCREENS = ['welcome', 'login', 'signup'];
@@ -36,7 +37,6 @@ const RANK = {
   login: 1,
   signup: 2,
   forgotpassword: 2,
-  verifycode: 3,
   resetpassword: 3,
   main: 3,
   upload: 4,
@@ -56,7 +56,26 @@ export default function App() {
   const [reviewer, setReviewer] = useState(null);
   const [job, setJob] = useState(null);
   const [overlay, setOverlay] = useState(null);
-  const [resetEmail, setResetEmail] = useState('');
+
+  // true while the user is resetting their password from an email link
+  const resettingRef = useRef(false);
+
+  useResetPasswordLink(() => {
+    resettingRef.current = true;
+    setScreen('resetpassword');
+  });
+
+  const cancelReset = async () => {
+    resettingRef.current = false;
+    setScreen('login');
+    await supabase.auth.signOut(); // the link signed them in, so undo it
+  };
+
+  const finishReset = async () => {
+    resettingRef.current = false;
+    setScreen('login');
+    await supabase.auth.signOut(); // make them log in with the new password
+  };
 
   const prevScreen = useRef(screen);
   const screenDir = useRef(1);
@@ -108,7 +127,7 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      setScreen(data.session ? 'main' : 'welcome');
+      if (!resettingRef.current) setScreen(data.session ? 'main' : 'welcome');
       setBooting(false);
     });
     const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -119,7 +138,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'android') NavigationBar.setVisibilityAsync('hidden');
+    if (Platform.OS === 'android') NavigationBar.setVisibilityAsync('visible');
   }, [overlay]);
 
   useEffect(() => {
@@ -128,8 +147,10 @@ export default function App() {
       if (screen === 'signup') return setScreen('login'), true;
       if (screen === 'login') return setScreen('welcome'), true;
       if (screen === 'forgotpassword') return setScreen('login'), true;
-      if (screen === 'verifycode') return setScreen('forgotpassword'), true;
-      if (screen === 'resetpassword') return setScreen('verifycode'), true;
+      if (screen === 'resetpassword') {
+        cancelReset();
+        return true;
+      }
       if (screen === 'generating') return true;
       if (screen === 'upload' || screen === 'reviewer' || screen === 'editprofile')
         return setScreen('main'), true;
@@ -236,30 +257,9 @@ export default function App() {
       case 'signup':
         return <SignupScreen onBack={() => setScreen('login')} onCreateAccount={handleSignup} onLogIn={() => setScreen('login')} />;
       case 'forgotpassword':
-        return (
-          <ForgotPasswordScreen
-            onBack={() => setScreen('login')}
-            onCodeSent={(email) => {
-              setResetEmail(email);
-              setScreen('verifycode');
-            }}
-          />
-        );
-      case 'verifycode':
-        return (
-          <VerifyCodeScreen
-            email={resetEmail}
-            onBack={() => setScreen('forgotpassword')}
-            onVerified={() => setScreen('resetpassword')}
-          />
-        );
+        return <ForgotPasswordScreen onBack={() => setScreen('login')} />;
       case 'resetpassword':
-        return (
-          <ResetPasswordScreen
-            onBack={() => setScreen('verifycode')}
-            onReset={() => setScreen('login')}
-          />
-        );
+        return <ResetPasswordScreen onBack={cancelReset} onReset={finishReset} />;
       case 'upload':
         return (
           <SwipeBack key="upload" onBack={() => setScreen('main')}>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
 
 const C = {
   bg: '#080A1C',
@@ -43,9 +44,26 @@ function PasswordInput({ label, value, onChangeText, placeholder }) {
 export default function ResetPasswordScreen({ onBack, onReset }) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const matches = password === confirm;
   const valid = password.length >= 6 && confirm.length > 0 && matches;
+
+  const handleReset = async () => {
+    if (!valid) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      Alert.alert('Password reset!', 'Your password has been updated. You can now log in.', [
+        { text: 'OK', onPress: () => onReset?.() },
+      ]);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Could not reset your password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={s.safe}>
@@ -72,13 +90,27 @@ export default function ResetPasswordScreen({ onBack, onReset }) {
         </Text>
 
         <View style={s.form}>
-          <PasswordInput label="NEW PASSWORD" value={password} onChangeText={setPassword} placeholder="At least 6 characters" />
-          <PasswordInput label="CONFIRM NEW PASSWORD" value={confirm} onChangeText={setConfirm} placeholder="Repeat new password" />
+          <PasswordInput
+            label="NEW PASSWORD"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="At least 6 characters"
+          />
+          <PasswordInput
+            label="CONFIRM NEW PASSWORD"
+            value={confirm}
+            onChangeText={setConfirm}
+            placeholder="Repeat new password"
+          />
         </View>
 
         {password.length > 0 && confirm.length > 0 && (
           <View style={s.matchRow}>
-            <Ionicons name={matches ? 'checkmark-circle' : 'close-circle'} size={16} color={matches ? '#4ADE80' : C.error} />
+            <Ionicons
+              name={matches ? 'checkmark-circle' : 'close-circle'}
+              size={16}
+              color={matches ? '#4ADE80' : C.error}
+            />
             <Text style={[s.matchText, { color: matches ? '#4ADE80' : C.error }]}>
               {matches ? 'Passwords match' : 'Passwords do not match'}
             </Text>
@@ -86,12 +118,21 @@ export default function ResetPasswordScreen({ onBack, onReset }) {
         )}
 
         <Pressable
-          onPress={() => onReset?.()}
-          disabled={!valid}
-          style={({ pressed }) => [s.cta, !valid && s.ctaDisabled, pressed && valid && { opacity: 0.88, transform: [{ scale: 0.99 }] }]}
+          onPress={handleReset}
+          disabled={!valid || loading}
+          style={({ pressed }) => [
+            s.cta,
+            (!valid || loading) && s.ctaDisabled,
+            pressed && valid && !loading && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+          ]}
         >
-          <Text style={s.ctaText}>Reset password</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+          {loading
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <>
+                <Text style={s.ctaText}>Reset password</Text>
+                <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+              </>
+          }
         </Pressable>
       </View>
     </SafeAreaView>

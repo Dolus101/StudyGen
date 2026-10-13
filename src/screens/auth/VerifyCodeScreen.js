@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
 
 const C = {
   bg: '#080A1C',
@@ -17,6 +18,8 @@ const C = {
 
 export default function VerifyCodeScreen({ onBack, onVerified, email = 'your email' }) {
   const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const inputs = useRef([]);
 
   const handleChange = (val, idx) => {
@@ -34,6 +37,45 @@ export default function VerifyCodeScreen({ onBack, onVerified, email = 'your ema
   };
 
   const filled = code.every((c) => c !== '');
+
+  const handleVerify = async () => {
+    if (!filled) return;
+    setLoading(true);
+    try {
+      const otp = code.join('');
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email',
+      });
+      if (error) throw error;
+      onVerified?.();
+    } catch (e) {
+      Alert.alert('Invalid code', e.message || 'The code is incorrect or has expired. Please try again.');
+      setCode(['', '', '', '', '', '']);
+      inputs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      });
+      if (error) throw error;
+      Alert.alert('Code sent!', 'A new verification code has been sent to your email.');
+      setCode(['', '', '', '', '', '']);
+      inputs.current[0]?.focus();
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Could not resend the code.');
+    } finally {
+      setResending(false);
+    }
+  };
 
   return (
     <SafeAreaView style={s.safe}>
@@ -73,23 +115,33 @@ export default function VerifyCodeScreen({ onBack, onVerified, email = 'your ema
               maxLength={1}
               style={[s.codeBox, digit && s.codeBoxFilled]}
               selectionColor={C.accent}
+              editable={!loading}
             />
           ))}
         </View>
 
         <Pressable
-          onPress={() => onVerified?.()}
-          disabled={!filled}
-          style={({ pressed }) => [s.cta, !filled && s.ctaDisabled, pressed && filled && { opacity: 0.88, transform: [{ scale: 0.99 }] }]}
+          onPress={handleVerify}
+          disabled={!filled || loading}
+          style={({ pressed }) => [
+            s.cta,
+            (!filled || loading) && s.ctaDisabled,
+            pressed && filled && !loading && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+          ]}
         >
-          <Text style={s.ctaText}>Verify code</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+          {loading
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <>
+                <Text style={s.ctaText}>Verify code</Text>
+                <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+              </>
+          }
         </Pressable>
 
         <View style={s.resendRow}>
           <Text style={s.resendText}>Didn't receive the code? </Text>
-          <Pressable>
-            <Text style={s.resendLink}>Resend</Text>
+          <Pressable onPress={handleResend} disabled={resending}>
+            <Text style={s.resendLink}>{resending ? 'Sending...' : 'Resend'}</Text>
           </Pressable>
         </View>
 

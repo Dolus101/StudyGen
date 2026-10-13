@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { saveQuizAttempt } from '../lib/api';
+import { useSettings } from '../hooks/useSettings';
 
 const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' };
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -69,6 +70,7 @@ const matches = (typed, answer) => {
 
 export default function QuizTab({ r, onExit }) {
   const quiz = r.quiz;
+  const { explain } = useSettings(); // "Quiz explanations" in Settings
   const [i, setI] = useState(0);
   const [sel, setSel] = useState(null);
   const [typed, setTyped] = useState('');
@@ -132,7 +134,11 @@ export default function QuizTab({ r, onExit }) {
   }
 
   const caption = checked
-    ? isCorrect ? 'Correct! Nice work.' : 'Not quite. Check the explanation below.'
+    ? isCorrect
+      ? 'Correct! Nice work.'
+      : explain
+        ? 'Not quite. Check the explanation below.'
+        : 'Not quite. Keep going!'
     : !canCheck
       ? isText ? 'Type an answer to continue.' : 'Choose one answer to continue.'
       : isText ? "Answer entered · Check it when you're ready." : "Answer selected · Check it when you're ready.";
@@ -229,22 +235,29 @@ export default function QuizTab({ r, onExit }) {
         <Text style={s.primaryText}>{checked ? (i + 1 >= total ? 'See results' : 'Next question') : 'Check answer'}</Text>
       </Pressable>
 
-      <View style={s.tip}>
-        <Ionicons name="bulb-outline" size={18} color={C.accent} />
-        <View style={{ flex: 1 }}>
-          {checked ? (
-            <>
-              <Text style={s.tipTitle}>Explanation</Text>
-              {!isCorrect && !!correctLabel && !isText && (
-                <Text style={[s.muted, { color: C.text, marginBottom: 4 }]}>Answer: {correctLabel}</Text>
-              )}
-              <Text style={s.muted}>{q.explanation}</Text>
-            </>
-          ) : (
-            <Text style={s.muted}>Practice at your own pace. Each answer includes an explanation to help you learn.</Text>
-          )}
+      {/* Hide the explanation box after checking when "Quiz explanations" is off */}
+      {(!checked || explain) && (
+        <View style={s.tip}>
+          <Ionicons name="bulb-outline" size={18} color={C.accent} />
+          <View style={{ flex: 1 }}>
+            {checked ? (
+              <>
+                <Text style={s.tipTitle}>Explanation</Text>
+                {!isCorrect && !!correctLabel && !isText && (
+                  <Text style={[s.muted, { color: C.text, marginBottom: 4 }]}>Answer: {correctLabel}</Text>
+                )}
+                <Text style={s.muted}>{q.explanation}</Text>
+              </>
+            ) : (
+              <Text style={s.muted}>
+                {explain
+                  ? 'Practice at your own pace. Each answer includes an explanation to help you learn.'
+                  : 'Practice at your own pace. Explanations are off, so you can turn them on in Settings.'}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
+      )}
 
       <Pressable onPress={onExit}>
         <Text style={s.exit}>Exit practice</Text>

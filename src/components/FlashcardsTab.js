@@ -1,18 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSettings } from '../hooks/useSettings';
+import { shuffleArray } from '../utils/shuffle';
 
 const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0' };
 
 export default function FlashcardsTab({ r }) {
   const base = r.flashcardList || [];
-  const [order, setOrder] = useState(base.map((_, i) => i));
+  const { shuffle: shuffleOn } = useSettings(); // "Shuffle flashcards" in Settings
+
+  // Start in random order if the setting is on, otherwise in the original order
+  const [order, setOrder] = useState(() => {
+    const idx = base.map((_, i) => i);
+    return shuffleOn ? shuffleArray(idx) : idx;
+  });
   const [pos, setPos] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
+  // Re-apply when the saved setting finishes loading or changes
+  useEffect(() => {
+    const idx = base.map((_, i) => i);
+    setOrder(shuffleOn ? shuffleArray(idx) : idx);
+    setPos(0);
+    setFlipped(false);
+  }, [shuffleOn, base.length]);
+
   if (!base.length) return <Text style={s.muted}>No flashcards yet</Text>;
 
-  const card = base[order[pos]];
+  const card = base[order[pos]] || base[0];
   const topic = r.topics[card.chapter] || r.topics[0];
   const TIcon = topic.lib === 'mci' ? MaterialCommunityIcons : Ionicons;
 
@@ -20,13 +36,10 @@ export default function FlashcardsTab({ r }) {
     setPos((p) => (p + d + order.length) % order.length);
     setFlipped(false);
   };
-  const shuffle = () => {
-    const a = [...order];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    setOrder(a);
+
+  // The Shuffle button always works, whatever the setting is
+  const shuffleDeck = () => {
+    setOrder(shuffleArray(order));
     setPos(0);
     setFlipped(false);
   };
@@ -38,7 +51,7 @@ export default function FlashcardsTab({ r }) {
           <Text style={s.h}>Flashcards</Text>
           <Text style={s.muted}>{r.stats.flashcards} cards · All chapters</Text>
         </View>
-        <Pressable onPress={shuffle} style={({ pressed }) => [s.shuffle, pressed && { opacity: 0.8 }]}>
+        <Pressable onPress={shuffleDeck} style={({ pressed }) => [s.shuffle, pressed && { opacity: 0.8 }]}>
           <Ionicons name="shuffle" size={14} color={C.accent} />
           <Text style={s.shuffleText}>Shuffle</Text>
         </Pressable>
