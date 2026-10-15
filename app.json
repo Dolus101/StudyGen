@@ -34,7 +34,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#080A1C",
         "foregroundImage": "./assets/logo.png"
-      }
+      },
+      "permissions": ["SCHEDULE_EXACT_ALARM"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -44,6 +45,5 @@
         "projectId": "afb7283f-ca14-4aad-8eec-cbea783f20d4"
       }
     }
-    
   }
 }

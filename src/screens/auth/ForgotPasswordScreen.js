@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { supabase } from '../../lib/supabase';
 
-const REDIRECT_URL = 'studygen://reset-password';
+const REDIRECT_URL = `${Constants.expoConfig?.scheme ?? 'studygen'}://reset-password`;
 
 const C = {
   bg: '#080A1C',
