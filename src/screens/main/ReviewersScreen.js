@@ -4,8 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useReviewers } from '../../lib/api';
 import { EmptyState, ErrorState, Loading } from '../../components/States';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#12152E',
   line: '#1C2044',
@@ -13,7 +14,7 @@ const C = {
   muted: '#8E92B2',
   accent: '#6B6CFF',
   button: '#5B63F0',
-};
+});
 
 const FILTERS = ['All reviewers', 'In progress', 'Completed'];
 
@@ -87,7 +88,7 @@ export default function ReviewersScreen({ onUpload, onOpenReviewer }) {
         <View style={s.header}>
           <Text style={s.title}>My Reviewers</Text>
           <Pressable onPress={onUpload} accessibilityRole="button" accessibilityLabel="Add reviewer" style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
-            <Ionicons name="add" size={22} color="#fff" />
+            <Ionicons name="add" size={22} color={C.accent} />
           </Pressable>
         </View>
         <Text style={s.sub}>{subtitle}</Text>
@@ -202,14 +203,14 @@ export default function ReviewersScreen({ onUpload, onOpenReviewer }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { color: C.text, fontSize: 21, fontWeight: '700' },
-  iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   sub: { color: C.muted, fontSize: 12, marginTop: 6 },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, borderRadius: 12, paddingHorizontal: 14, marginTop: 18, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: C.line },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, borderRadius: 12, paddingHorizontal: 14, marginTop: 18, backgroundColor: C.field, borderWidth: 1, borderColor: C.line },
   input: { flex: 1, color: C.text, fontSize: 14, padding: 0 },
   chips: { flexDirection: 'row', gap: 8, marginTop: 14 },
   chip: { paddingHorizontal: 14, height: 32, borderRadius: 9, backgroundColor: C.card, alignItems: 'center', justifyContent: 'center' },
@@ -224,22 +225,22 @@ const s = StyleSheet.create({
   rowIcon: { width: 44, height: 44, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   rowTitle: { color: C.text, fontSize: 15, fontWeight: '500' },
   rowMeta: { color: C.muted, fontSize: 11, marginTop: 3 },
-  track: { height: 4, borderRadius: 2, backgroundColor: '#23274D', marginTop: 8, overflow: 'hidden' },
+  track: { height: 4, borderRadius: 2, backgroundColor: C.track, marginTop: 8, overflow: 'hidden' },
   fill: { height: 4, borderRadius: 2, backgroundColor: C.accent },
   deleteBtn: { width: 28, height: 28, borderRadius: 8, backgroundColor: 'rgba(255, 114, 123, 0.12)', alignItems: 'center', justifyContent: 'center' },
   confirmOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: 'rgba(4, 6, 20, 0.78)' },
-  confirmDialog: { width: '100%', maxWidth: 360, backgroundColor: '#12152E', borderWidth: 1, borderColor: '#30365F', borderRadius: 16, padding: 20, shadowColor: '#000', shadowOpacity: 0.45, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 18 },
+  confirmDialog: { width: '100%', maxWidth: 360, backgroundColor: C.card, borderWidth: 1, borderColor: C.line, borderRadius: 16, padding: 20, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 18 },
   confirmIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: 'rgba(255, 114, 123, 0.12)', alignItems: 'center', justifyContent: 'center' },
   confirmTitle: { color: C.text, fontSize: 18, fontWeight: '700', marginTop: 16 },
   confirmBody: { color: C.muted, fontSize: 13, lineHeight: 19, marginTop: 8 },
   confirmActions: { flexDirection: 'row', gap: 10, marginTop: 22 },
-  cancelBtn: { flex: 1, height: 44, borderRadius: 10, backgroundColor: '#202445', alignItems: 'center', justifyContent: 'center' },
+  cancelBtn: { flex: 1, height: 44, borderRadius: 10, backgroundColor: C.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   cancelText: { color: C.text, fontSize: 14, fontWeight: '600' },
   confirmDeleteBtn: { flex: 1, height: 44, borderRadius: 10, backgroundColor: '#D94B5A', alignItems: 'center', justifyContent: 'center' },
   confirmDeleteText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-  cta: { marginTop: 20, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#232859', borderRadius: 18, padding: 16 },
+  cta: { marginTop: 20, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, padding: 16 },
   ctaTitle: { color: C.text, fontSize: 15, fontWeight: '700' },
   ctaBody: { color: C.muted, fontSize: 12, lineHeight: 18, marginTop: 6 },
   ctaBtn: { flexDirection: 'row', gap: 8, height: 46, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center', marginTop: 14 },
   ctaBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-});
+}));

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { markChapterReviewed } from '../../lib/api';
@@ -7,8 +7,9 @@ import NotesTab from '../../components/NotesTab';
 import FlashcardsTab from '../../components/FlashcardsTab';
 import QuizTab from '../../components/QuizTab';
 import { FadeIn } from '../../components/Transition';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#12152E',
   line: '#1C2044',
@@ -19,7 +20,7 @@ const C = {
   button: '#5B63F0',
   green: '#34D399',
   orange: '#F5A84B',
-};
+});
 
 const TABS = ['Overview', 'Notes', 'Flashcards', 'Quiz'];
 const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -27,7 +28,7 @@ const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 function IconButton({ name, onPress, label }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
-      <Ionicons name={name} size={20} color="#fff" />
+      <Ionicons name={name} size={20} color={C.text} />
     </Pressable>
   );
 }
@@ -165,11 +166,11 @@ export default function ReviewerScreen({ reviewer, onBack }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 12, paddingHorizontal: 20, paddingTop: 14 },
   title: { flex: 1, flexShrink: 1, textAlign: 'left', color: C.text, fontSize: 17, fontWeight: '700' },
-  iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
 
   tabs: { flexDirection: 'row', gap: 6, paddingHorizontal: 20, marginTop: 16 },
   tab: { flex: 1, height: 36, borderRadius: 9, backgroundColor: C.card, alignItems: 'center', justifyContent: 'center' },
@@ -179,9 +180,9 @@ const s = StyleSheet.create({
 
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 28 },
 
-  summary: { backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63', borderRadius: 18, padding: 16 },
+  summary: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong, borderRadius: 18, padding: 16 },
   summaryHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  summaryIcon: { width: 32, height: 32, borderRadius: 9, backgroundColor: '#1E2250', alignItems: 'center', justifyContent: 'center' },
+  summaryIcon: { width: 32, height: 32, borderRadius: 9, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center' },
   summaryTitle: { flex: 1, color: C.text, fontSize: 16, fontWeight: '700' },
   badge: { backgroundColor: 'rgba(52,211,153,0.14)', borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
   badgeText: { color: C.green, fontSize: 11, fontWeight: '600' },
@@ -196,11 +197,11 @@ const s = StyleSheet.create({
   h2: { color: C.text, fontSize: 16, fontWeight: '700' },
   small: { color: C.muted, fontSize: 12 },
   topic: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderRadius: 14, padding: 12 },
-  topicIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center' },
+  topicIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center' },
   topicTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
   topicSub: { color: C.muted, fontSize: 11, marginTop: 3 },
 
-  progress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, minHeight: 148, backgroundColor: '#0E1130', borderRadius: 18, paddingHorizontal: 18 },
+  progress: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, minHeight: 148, backgroundColor: C.surface, borderRadius: 18, paddingHorizontal: 18 },
   progressTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
   percent: { color: C.accent, fontSize: 22, fontWeight: '600' },
-});
+}));

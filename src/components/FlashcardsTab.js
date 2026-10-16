@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSettings } from '../hooks/useSettings';
 import { shuffleArray } from '../utils/shuffle';
+import { createThemeColors, createThemedStyles } from '../hooks/useTheme';
 
-const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0' };
+const C = createThemeColors({ card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0' });
 
 export default function FlashcardsTab({ r }) {
   const base = r.flashcardList || [];
@@ -120,14 +121,14 @@ export default function FlashcardsTab({ r }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   muted: { color: C.muted, fontSize: 12 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   h: { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 2 },
-  shuffle: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 32, borderRadius: 9, backgroundColor: '#1A1E4A' },
+  shuffle: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 32, borderRadius: 9, backgroundColor: C.softSurface },
   shuffleText: { color: C.accent, fontSize: 12, fontWeight: '600' },
 
-  chapter: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
+  chapter: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong },
   badge: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   chapterLabel: { color: C.accent, fontSize: 10, fontWeight: '700', letterSpacing: 0.6 },
@@ -135,14 +136,14 @@ const s = StyleSheet.create({
 
   countRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
   count: { color: C.text, fontSize: 13, fontWeight: '700' },
-  track: { height: 4, borderRadius: 2, backgroundColor: '#23274D', marginTop: 8, overflow: 'hidden' },
+  track: { height: 4, borderRadius: 2, backgroundColor: C.track, marginTop: 8, overflow: 'hidden' },
   fill: { height: 4, borderRadius: 2, backgroundColor: C.accent },
 
-  flash: { marginTop: 14, minHeight: 250, borderRadius: 18, padding: 16, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63', justifyContent: 'space-between' },
+  flash: { marginTop: 14, minHeight: 250, borderRadius: 18, padding: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong, justifyContent: 'space-between' },
   flashTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   concept: { color: C.accent, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
   flashBody: { alignItems: 'center', paddingHorizontal: 8 },
-  flashIcon: { width: 54, height: 54, borderRadius: 14, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
+  flashIcon: { width: 54, height: 54, borderRadius: 14, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   flashText: { color: C.text, fontSize: 19, fontWeight: '600', textAlign: 'center', lineHeight: 26 },
   flip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   flipText: { color: C.muted, fontSize: 11 },
@@ -155,4 +156,4 @@ const s = StyleSheet.create({
 
   tip: { marginTop: 14, padding: 14, borderRadius: 14, backgroundColor: C.card, gap: 4 },
   tipTitle: { color: C.text, fontSize: 13, fontWeight: '700' },
-});
+}));

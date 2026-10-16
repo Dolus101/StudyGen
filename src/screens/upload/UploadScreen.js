@@ -3,8 +3,9 @@ import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'rea
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { pickPdf } from '../../lib/pickPdf';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#121530',
   field: '#101328',
@@ -14,7 +15,7 @@ const C = {
   accent: '#6B6CFF',
   button: '#5B63F0',
   red: '#F0596B',
-};
+});
 
 const OPTIONS = {
   lang: { title: 'Exam language', multi: false, items: ['English', 'Filipino', 'Spanish'] },
@@ -27,7 +28,7 @@ const MAX_MB = 10;
 function IconButton({ name, onPress, label }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
-      <Ionicons name={name} size={20} color="#fff" />
+      <Ionicons name={name} size={20} color={C.text} />
     </Pressable>
   );
 }
@@ -171,16 +172,16 @@ export default function UploadScreen({ onBack, onGenerate }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 6 },
   title: { color: C.text, fontSize: 17, fontWeight: '700' },
   headerSpacer: { width: 40, height: 40 },
-  iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 20 },
 
-  drop: { height: 150, borderRadius: 16, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#5558E3', backgroundColor: '#101328', alignItems: 'center', justifyContent: 'center' },
-  dropIcon: { width: 52, height: 52, borderRadius: 14, backgroundColor: '#1D2150', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
+  drop: { height: 150, borderRadius: 16, borderWidth: 1.5, borderStyle: 'dashed', borderColor: C.accent, backgroundColor: C.field, alignItems: 'center', justifyContent: 'center' },
+  dropIcon: { width: 52, height: 52, borderRadius: 14, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   dropTitle: { color: C.text, fontSize: 15, fontWeight: '500' },
   dropSub: { color: C.muted, fontSize: 11, marginTop: 6 },
 
@@ -188,7 +189,7 @@ const s = StyleSheet.create({
   fileIcon: { width: 42, height: 42, borderRadius: 10, backgroundColor: C.red, alignItems: 'center', justifyContent: 'center' },
   fileName: { color: C.text, fontSize: 14, fontWeight: '500' },
   fileMeta: { color: C.muted, fontSize: 11, marginTop: 3 },
-  remove: { width: 34, height: 34, borderRadius: 9, backgroundColor: '#1E2144', alignItems: 'center', justifyContent: 'center' },
+  remove: { width: 34, height: 34, borderRadius: 9, backgroundColor: C.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
 
   h2: { color: C.text, fontSize: 17, fontWeight: '700', marginTop: 26 },
   h2Sub: { color: C.muted, fontSize: 12, marginTop: 4 },
@@ -200,8 +201,8 @@ const s = StyleSheet.create({
   cta: { flexDirection: 'row', gap: 8, height: 52, borderRadius: 14, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
   ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 
-  sheet: { backgroundColor: '#12152E', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 20, paddingBottom: 32 },
+  sheet: { backgroundColor: C.card, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 20, paddingBottom: 32 },
   sheetTitle: { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 8 },
   sheetRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.line },
   sheetText: { color: C.text, fontSize: 15 },
-});
+}));

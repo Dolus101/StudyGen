@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { generateReviewer, uploadPdf } from '../../lib/api';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = { bg: '#080A1C', card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' };
+const C = createThemeColors({ bg: '#080A1C', card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' });
 
 function Step({ state, label }) {
   return (
@@ -134,21 +135,21 @@ export default function GeneratingScreen({ job, onDone, onBack }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   container: { flex: 1, paddingHorizontal: 24, paddingTop: 48, paddingBottom: 20 },
   title: { color: C.text, fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
   sub: { color: C.muted, fontSize: 13, lineHeight: 20, marginTop: 8 },
-  bar: { height: 8, borderRadius: 4, backgroundColor: '#23274D', marginTop: 24, overflow: 'hidden' },
+  bar: { height: 8, borderRadius: 4, backgroundColor: C.track, marginTop: 24, overflow: 'hidden' },
   fill: { height: 8, borderRadius: 4, backgroundColor: C.accent },
   card: { marginTop: 22, padding: 18, borderRadius: 18, backgroundColor: C.card, borderWidth: 1, borderColor: C.line, gap: 18 },
   step: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  dot: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#23274D', alignItems: 'center', justifyContent: 'center' },
+  dot: { width: 24, height: 24, borderRadius: 12, backgroundColor: C.track, alignItems: 'center', justifyContent: 'center' },
   stepText: { color: C.text, fontSize: 14 },
-  errorCard: { marginTop: 24, padding: 18, borderRadius: 18, backgroundColor: '#2A1418', alignItems: 'center', gap: 10 },
-  errorText: { color: '#FCA5A5', fontSize: 13, lineHeight: 19, textAlign: 'center' },
+  errorCard: { marginTop: 24, padding: 18, borderRadius: 18, backgroundColor: '#FFF0F1', alignItems: 'center', gap: 10 },
+  errorText: { color: C.red, fontSize: 13, lineHeight: 19, textAlign: 'center' },
   btn: { height: 52, borderRadius: 14, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
   btnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   link: { alignItems: 'center', paddingVertical: 16 },
   linkText: { color: C.muted, fontSize: 13 },
-});
+}));

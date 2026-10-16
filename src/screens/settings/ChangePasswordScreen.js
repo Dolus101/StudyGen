@@ -4,7 +4,6 @@ import {
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -12,8 +11,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#12152E',
   line: '#1C2044',
@@ -21,7 +21,7 @@ const C = {
   muted: '#8E92B2',
   accent: '#6B6CFF',
   error: '#FF727B',
-};
+});
 
 function PasswordInput({ label, value, onChangeText, placeholder }) {
   const [show, setShow] = useState(false);
@@ -106,7 +106,7 @@ export default function ChangePasswordScreen({ onBack }) {
         {/* Header */}
         <View style={s.header}>
           <Pressable onPress={onBack} style={({ pressed }) => [s.backBtn, pressed && { opacity: 0.7 }]}>
-            <Ionicons name="chevron-back" size={20} color="#fff" />
+            <Ionicons name="chevron-back" size={20} color={C.text} />
           </Pressable>
           <Text style={s.title}>Change Password</Text>
           <View style={{ width: 38 }} />
@@ -173,13 +173,13 @@ export default function ChangePasswordScreen({ onBack }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-  backBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: '#1C2044', alignItems: 'center', justifyContent: 'center' },
-  title: { color: '#fff', fontSize: 18, fontWeight: '700' },
-  infoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#232859', borderRadius: 12, padding: 14, marginBottom: 24 },
+  backBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  title: { color: C.text, fontSize: 18, fontWeight: '700' },
+  infoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 14, marginBottom: 24 },
   infoText: { flex: 1, color: C.muted, fontSize: 12, lineHeight: 18 },
   form: { gap: 16 },
   label: { color: C.text, fontSize: 13, fontWeight: '600', marginBottom: 6 },
@@ -189,4 +189,4 @@ const s = StyleSheet.create({
   matchText: { fontSize: 12 },
   saveBtn: { marginTop: 32, height: 50, borderRadius: 14, backgroundColor: C.accent, alignItems: 'center', justifyContent: 'center' },
   saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-});
+}));

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const KEY = 'studySettings';
-const DEFAULTS = { shuffle: true, explain: true };
+const DEFAULTS = { shuffle: true, explain: true, theme: 'dark' };
 
 // One shared copy of the settings, so Settings, Flashcards and Quiz always agree.
 let state = DEFAULTS;
@@ -15,6 +15,8 @@ const subscribe = (l) => {
   return () => listeners.delete(l);
 };
 const getSnapshot = () => state;
+
+export const getSettingsSnapshot = getSnapshot;
 
 function load() {
   if (!loading) {

@@ -5,7 +5,6 @@ import {
   Image,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -14,8 +13,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useProfile } from '../../lib/api';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#12152E',
   line: '#1C2044',
@@ -23,7 +23,7 @@ const C = {
   muted: '#8E92B2',
   accent: '#6B6CFF',
   indigo: '#6366F1',
-};
+});
 
 export default function EditProfileScreen({ onBack, onSaved }) {
   const { profile, loading, update } = useProfile();
@@ -89,7 +89,7 @@ export default function EditProfileScreen({ onBack, onSaved }) {
         {/* Header */}
         <View style={s.header}>
           <Pressable onPress={onBack} style={({ pressed }) => [s.backBtn, pressed && { opacity: 0.7 }]}>
-            <Ionicons name="chevron-back" size={20} color="#fff" />
+            <Ionicons name="chevron-back" size={20} color={C.text} />
           </Pressable>
           <Text style={s.title}>Edit Profile</Text>
           <View style={{ width: 38 }} />
@@ -155,14 +155,14 @@ export default function EditProfileScreen({ onBack, onSaved }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 },
-  backBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: '#1C2044', alignItems: 'center', justifyContent: 'center' },
-  title: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  backBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  title: { color: C.text, fontSize: 18, fontWeight: '700' },
 
   avatarWrap: { alignItems: 'center', marginBottom: 32 },
   avatarOuter: { position: 'relative', width: 96, height: 96 },
@@ -174,10 +174,10 @@ const s = StyleSheet.create({
   form: { gap: 6 },
   label: { color: C.text, fontSize: 13, fontWeight: '600', marginTop: 16, marginBottom: 6 },
   inputWrap: { flexDirection: 'row', alignItems: 'center', height: 48, borderRadius: 12, paddingHorizontal: 14, backgroundColor: C.card, borderWidth: 1, borderColor: C.line },
-  inputDisabled: { opacity: 0.6 },
+  inputDisabled: { opacity: 0.75, backgroundColor: C.surfaceAlt },
   input: { flex: 1, color: C.text, fontSize: 14, padding: 0 },
   hint: { color: C.muted, fontSize: 11, marginTop: 4 },
 
   saveBtn: { marginTop: 32, height: 50, borderRadius: 14, backgroundColor: C.accent, alignItems: 'center', justifyContent: 'center' },
   saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-});
+}));

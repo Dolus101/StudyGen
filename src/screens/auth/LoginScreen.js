@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   panel: '#1B1F3A',
   input: '#212857',
@@ -14,7 +15,7 @@ const C = {
   subtext: '#C9CCDF',
   accent: '#73E2FF',
   link: '#7C68FF',
-};
+});
 
 function Field({
   label,
@@ -34,7 +35,7 @@ function Field({
           <Ionicons
             name={label === 'EMAIL ADDRESS' ? 'mail-outline' : 'lock-closed-outline'}
             size={18}
-            color="#7C68FF"
+            color={C.link}
             style={s.inputIcon}
           />
         </View>
@@ -50,7 +51,7 @@ function Field({
         />
         {rightIcon ? (
           <Pressable onPress={onRightPress} style={s.rightAction}>
-            <Ionicons name={rightIcon} size={18} color="#7C68FF" />
+            <Ionicons name={rightIcon} size={18} color={C.link} />
           </Pressable>
         ) : null}
       </View>
@@ -158,11 +159,11 @@ export default function LoginScreen({ onBack, onLogin, onCreateAccount, onForgot
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles(() => ({
   safe: { flex: 1, backgroundColor: C.bg },
   container: { flex: 1, paddingHorizontal: 24, backgroundColor: C.bg },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, marginBottom: 12, minHeight: 34, position: 'relative' },
-  backButton: { position: 'absolute', left: 0, width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: '#171D3B' },
+  backButton: { position: 'absolute', left: 0, width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surfaceAlt },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center' },
   logo: { width: 26, height: 42.78 },
   brandName: { color: C.text, fontSize: 20, fontWeight: '800', letterSpacing: -0.5 },
@@ -186,11 +187,11 @@ const s = StyleSheet.create({
   cta: { height: 52, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' },
   ctaText: { color: '#fff', fontSize: 13, fontWeight: '700', textAlign: 'center' },
   ctaIcon: { marginLeft: 8 },
-  summaryCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1B1F3A', borderWidth: 1, borderColor: '#283052', borderRadius: 14, paddingVertical: 16, paddingHorizontal: 16, marginTop: 158, marginBottom: 28 },
+  summaryCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.panel, borderWidth: 1, borderColor: C.inputBorder, borderRadius: 14, paddingVertical: 16, paddingHorizontal: 16, marginTop: 158, marginBottom: 28 },
   iconBox: { width: 82, height: 48, borderRadius: 0, backgroundColor: 'transparent', marginRight: 12 },
   summaryTextWrap: { flex: 1, marginTop: 4 },
-  summaryTitle: { color: '#fff', fontSize: 12, fontWeight: '700', marginBottom: 5 },
+  summaryTitle: { color: C.text, fontSize: 12, fontWeight: '700', marginBottom: 5 },
   summaryText: { color: C.muted, fontSize: 10, lineHeight: 18 },
   footerText: { color: C.muted, fontSize: 12, textAlign: 'center' },
   footerLink: { color: C.link, fontWeight: '700' },
-});
+}));

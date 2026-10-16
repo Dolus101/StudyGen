@@ -1,5 +1,8 @@
 import { useRef } from 'react';
 import { Animated, Dimensions, Easing, PanResponder } from 'react-native';
+import { createThemeColors } from '../hooks/useTheme';
+
+const C = createThemeColors();
 
 const W = Dimensions.get('window').width;
 
@@ -37,7 +40,7 @@ export default function SwipeBack({ onBack, edge = 60, children }) {
   return (
     <Animated.View
       {...pan.panHandlers}
-      style={{ flex: 1, backgroundColor: '#080A1C', transform: [{ translateX: x }] }}
+      style={{ flex: 1, backgroundColor: C.bg, transform: [{ translateX: x }] }}
     >
       {children}
     </Animated.View>
