@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   input: '#212857',
   inputBorder: '#2E3A73',
@@ -15,7 +16,7 @@ const C = {
   accent: '#73E2FF',
   link: '#7C68FF',
   error: '#FF727B',
-};
+});
 
 function PasswordInput({ label, value, onChangeText, placeholder }) {
   const [show, setShow] = useState(false);
@@ -139,16 +140,16 @@ export default function ResetPasswordScreen({ onBack, onReset }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles(() => ({
   safe: { flex: 1, backgroundColor: C.bg },
   container: { flex: 1, paddingHorizontal: 24, backgroundColor: C.bg },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, marginBottom: 12, minHeight: 34, position: 'relative' },
-  backButton: { position: 'absolute', left: 0, width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: '#171D3B' },
+  backButton: { position: 'absolute', left: 0, width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surfaceAlt },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   logo: { width: 26, height: 42.78 },
   brandName: { color: C.text, fontSize: 20, fontWeight: '800', letterSpacing: -0.5 },
   iconWrap: { alignItems: 'center', marginTop: 32, marginBottom: 24 },
-  iconCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#1B1F3A', borderWidth: 1, borderColor: '#2E3A73', alignItems: 'center', justifyContent: 'center' },
+  iconCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.panel, borderWidth: 1, borderColor: C.inputBorder, alignItems: 'center', justifyContent: 'center' },
   title: { color: C.text, fontSize: 28, fontWeight: '800', letterSpacing: -1, marginBottom: 8 },
   subtitle: { color: C.muted, fontSize: 13, lineHeight: 20, marginBottom: 28 },
   form: { gap: 4 },
@@ -162,4 +163,4 @@ const s = StyleSheet.create({
   cta: { height: 52, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: 8 },
   ctaDisabled: { opacity: 0.4 },
   ctaText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-});
+}));

@@ -1,10 +1,11 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useReviewers } from '../../lib/api';
 import { EmptyState, ErrorState, Loading } from '../../components/States';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#12152E',
   line: '#1C2044',
@@ -12,7 +13,7 @@ const C = {
   muted: '#8E92B2',
   accent: '#6B6CFF',
   track: '#23274D',
-};
+});
 
 // Circular progress ring built from plain Views (no extra packages).
 function Ring({ size = 72, stroke = 7, percent, color = C.accent, track = C.track, children }) {
@@ -48,7 +49,7 @@ export default function StatsScreen({ name = 'there', onOpenReviewer, onUpload }
         <View style={s.header}>
           <Text style={s.title}>Study progress</Text>
           <View style={s.iconBtn}>
-            <Ionicons name="bar-chart-outline" size={19} color="#fff" />
+            <Ionicons name="bar-chart-outline" size={19} color={C.accent} />
           </View>
         </View>
         <Text style={s.sub}>A clear view of your reviewers, {name}.</Text>
@@ -137,17 +138,17 @@ export default function StatsScreen({ name = 'there', onOpenReviewer, onUpload }
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { color: C.text, fontSize: 21, fontWeight: '700' },
-  iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   sub: { color: C.muted, fontSize: 12, marginTop: 6 },
   muted: { color: C.muted, fontSize: 12 },
   small: { color: C.muted, fontSize: 11 },
 
-  hero: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 18, padding: 16, borderRadius: 18, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
+  hero: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 18, padding: 16, borderRadius: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong },
   ringText: { color: C.text, fontSize: 17, fontWeight: '700' },
   heroTitle: { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 4 },
   link: { color: C.accent, fontSize: 12, fontWeight: '600', marginTop: 8 },
@@ -161,12 +162,12 @@ const s = StyleSheet.create({
 
   row: { padding: 14, borderRadius: 14, backgroundColor: C.card },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  rowTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
-  rowPct: { color: C.accent, fontSize: 13, fontWeight: '700' },
+  rowTitle: { flex: 1, flexShrink: 1, color: C.text, fontSize: 14, fontWeight: '500' },
+  rowPct: { flexShrink: 0, marginLeft: 8, color: C.accent, fontSize: 13, fontWeight: '700' },
   track: { height: 5, borderRadius: 3, backgroundColor: C.track, marginTop: 10, overflow: 'hidden' },
   fill: { height: 5, borderRadius: 3, backgroundColor: C.accent },
 
-  tip: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16, padding: 14, borderRadius: 14, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
-  tipIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center' },
+  tip: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16, padding: 14, borderRadius: 14, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong },
+  tipIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center' },
   tipTitle: { color: C.text, fontSize: 13, fontWeight: '700', marginBottom: 2 },
-});
+}));

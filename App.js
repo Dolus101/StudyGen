@@ -26,9 +26,10 @@ import Transition from './src/components/Transition';
 import SwipeBack from './src/components/SwipeBack';
 import SwipeTabs from './src/components/SwipeTabs';
 import useResetPasswordLink from './src/hooks/useResetPasswordLink';
+import { useSettings } from './src/hooks/useSettings';
+import { getThemePalette } from './src/hooks/useTheme';
 import './src/notificationSetup';
 
-const BG = '#080A1C';
 const AUTH_SCREENS = ['welcome', 'login', 'signup'];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -49,6 +50,8 @@ const RANK = {
 const TAB_ORDER = ['home', 'reviewers', 'stats', 'profile'];
 
 export default function App() {
+  const { theme } = useSettings();
+  const palette = getThemePalette(theme);
   const [booting, setBooting] = useState(true);
   const [session, setSession] = useState(null);
   const [screen, setScreen] = useState('welcome');
@@ -138,8 +141,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'android') NavigationBar.setVisibilityAsync('visible');
-  }, [overlay]);
+    if (Platform.OS === 'android') {
+      NavigationBar.setVisibilityAsync('visible');
+      if (typeof NavigationBar.setBackgroundColorAsync === 'function') {
+        NavigationBar.setBackgroundColorAsync(palette.bg);
+      }
+      if (typeof NavigationBar.setButtonStyleAsync === 'function') {
+        NavigationBar.setButtonStyleAsync(theme === 'light' ? 'dark' : 'light');
+      }
+    }
+  }, [overlay, palette.bg, theme]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -215,7 +226,7 @@ export default function App() {
     if (next) setTab(next);
   };
 
-  if (booting) return <View style={{ flex: 1, backgroundColor: BG }} />;
+  if (booting) return <View style={{ flex: 1, backgroundColor: palette.bg }} />;
 
   const renderTab = () => {
     if (tab === 'home') {
@@ -307,7 +318,7 @@ export default function App() {
         ) : null;
       default:
         return (
-          <View style={{ flex: 1, backgroundColor: BG }}>
+          <View style={{ flex: 1, backgroundColor: palette.bg }}>
             <View style={{ flex: 1 }}>
               <Transition viewKey={tab} direction={tabDir.current} distance={36}>
                 <SwipeTabs onSwipe={swipeTab}>{renderTab()}</SwipeTabs>
@@ -321,8 +332,8 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
-      <View style={{ flex: 1, backgroundColor: BG }}>
+      <StatusBar style={theme === 'light' ? 'dark' : 'light'} />
+      <View style={{ flex: 1, backgroundColor: palette.bg }}>
         <Transition viewKey={screen} direction={screenDir.current} distance={56}>
           {renderScreen()}
         </Transition>

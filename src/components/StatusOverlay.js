@@ -1,8 +1,9 @@
 import { useRef } from 'react';
-import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { createThemeColors, createThemedStyles } from '../hooks/useTheme';
 
-const C = { card: '#12152E', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', green: '#34D399' };
+const C = createThemeColors({ card: '#12152E', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', green: '#34D399' });
 
 // overlay = { state: 'loading' | 'success', title: string, message?: string } or null
 export default function StatusOverlay({ overlay }) {
@@ -32,11 +33,11 @@ export default function StatusOverlay({ overlay }) {
   );
 }
 
-const s = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(8,10,28,0.88)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
-  card: { width: '100%', maxWidth: 280, alignItems: 'center', paddingVertical: 28, paddingHorizontal: 20, borderRadius: 22, backgroundColor: C.card, borderWidth: 1, borderColor: '#262B63' },
-  iconWrap: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+const s = createThemedStyles((C) => ({
+  backdrop: { flex: 1, backgroundColor: 'rgba(8,10,28,0.72)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  card: { width: '100%', maxWidth: 280, alignItems: 'center', paddingVertical: 28, paddingHorizontal: 20, borderRadius: 22, backgroundColor: C.card, borderWidth: 1, borderColor: C.borderStrong },
+  iconWrap: { width: 64, height: 64, borderRadius: 32, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   iconSuccess: { backgroundColor: C.green },
   title: { color: C.text, fontSize: 17, fontWeight: '700', textAlign: 'center' },
   message: { color: C.muted, fontSize: 13, lineHeight: 19, textAlign: 'center', marginTop: 6 },
-});
+}));

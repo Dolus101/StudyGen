@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: "#080A1C",
   panel: "#1B1F3A",
   input: "#212857",
@@ -13,7 +14,7 @@ const C = {
   muted: "#9AA2C6",
   subtext: "#C9CCDF",
   accent: "#73E2FF",
-};
+});
 
 function Field({ label, placeholder, value, onChangeText, keyboardType = "default", autoCapitalize = "none", secureTextEntry = false, leftIcon, rightIcon, onRightPress }) {
   return (
@@ -21,7 +22,7 @@ function Field({ label, placeholder, value, onChangeText, keyboardType = "defaul
       <Text style={s.label}>{label}</Text>
       <View style={s.inputRow}>
         <View style={s.inputLeft}>
-          <Ionicons name={leftIcon} size={18} color="#7C68FF" style={s.inputIcon} />
+          <Ionicons name={leftIcon} size={18} color={C.link} style={s.inputIcon} />
         </View>
         <TextInput
           value={value}
@@ -35,7 +36,7 @@ function Field({ label, placeholder, value, onChangeText, keyboardType = "defaul
         />
         {rightIcon ? (
           <Pressable onPress={onRightPress} style={s.rightAction}>
-            <Ionicons name={rightIcon} size={18} color="#7C68FF" />
+            <Ionicons name={rightIcon} size={18} color={C.link} />
           </Pressable>
         ) : null}
       </View>
@@ -118,11 +119,11 @@ export default function SignupScreen({ onBack, onCreateAccount, onLogIn }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles(() => ({
   safe: { flex: 1, backgroundColor: C.bg },
   container: { flex: 1, paddingHorizontal: 24, paddingBottom: 156, backgroundColor: C.bg },
   topBar: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 12, marginBottom: 12, minHeight: 34, position: "relative" },
-  backButton: { position: "absolute", left: 0, width: 34, height: 34, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: "#171D3B" },
+  backButton: { position: "absolute", left: 0, width: 34, height: 34, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceAlt },
   brandRow: { flexDirection: "row", alignItems: "center", gap: 8, justifyContent: "center" },
   logo: { width: 26, height: 42.78 },
   brandName: { color: C.text, fontSize: 20, fontWeight: "800", letterSpacing: -0.5 },
@@ -141,12 +142,12 @@ const s = StyleSheet.create({
   checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 1, borderColor: "#7B82B8", backgroundColor: "transparent", alignItems: "center", justifyContent: "center", marginRight: 10 },
   checkboxChecked: { backgroundColor: C.button, borderColor: C.button },
   checkboxText: { color: C.subtext, fontSize: 11, flex: 1, lineHeight: 18 },
-  checkboxLink: { color: "#7C68FF", fontWeight: "700" },
+  checkboxLink: { color: C.link, fontWeight: "700" },
   error: { color: "#F87171", fontSize: 12, marginTop: -8, marginBottom: 10 },
   cta: { height: 52, borderRadius: 12, backgroundColor: "#5864F2", marginTop: 6, justifyContent: "center", alignItems: "center" },
   ctaInner: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 18 },
   ctaText: { color: "#fff", fontSize: 13, fontWeight: "700", textAlign: "center" },
   ctaIcon: { marginLeft: 8, alignSelf: "center" },
   footerText: { color: C.muted, fontSize: 12, textAlign: "center", marginTop: 70 },
-  footerLink: { color: "#7C68FF", fontWeight: "700" },
-});
+  footerLink: { color: C.link, fontWeight: "700" },
+}));

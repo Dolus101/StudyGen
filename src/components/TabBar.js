@@ -1,6 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { createThemeColors, createThemedStyles } from '../hooks/useTheme';
+
+const C = createThemeColors({ accent: '#6B6CFF', muted: '#7C80A0' });
 
 const TABS = [
   { key: 'home', label: 'Home', icon: 'home' },
@@ -17,8 +20,8 @@ export default function TabBar({ active, onChange }) {
         const on = t.key === active;
         return (
           <Pressable key={t.key} style={s.tab} onPress={() => onChange(t.key)} accessibilityRole="tab" accessibilityState={{ selected: on }}>
-            <Ionicons name={on ? t.icon : `${t.icon}-outline`} size={22} color={on ? '#6B6CFF' : '#7C80A0'} />
-            <Text style={[s.label, { color: on ? '#6B6CFF' : '#7C80A0', fontWeight: on ? '700' : '500' }]}>{t.label}</Text>
+            <Ionicons name={on ? t.icon : `${t.icon}-outline`} size={22} color={on ? C.accent : C.muted} />
+            <Text style={[s.label, { color: on ? C.accent : C.muted, fontWeight: on ? '700' : '500' }]}>{t.label}</Text>
           </Pressable>
         );
       })}
@@ -26,8 +29,8 @@ export default function TabBar({ active, onChange }) {
   );
 }
 
-const s = StyleSheet.create({
-  bar: { flexDirection: 'row', backgroundColor: '#0B0D24', borderTopWidth: 1, borderTopColor: '#1A1D3A', paddingTop: 10 },
+const s = createThemedStyles((C) => ({
+  bar: { flexDirection: 'row', backgroundColor: C.bg, borderTopWidth: 1, borderTopColor: C.line, paddingTop: 10 },
   tab: { flex: 1, alignItems: 'center', gap: 4 },
   label: { fontSize: 10 },
-});
+}));

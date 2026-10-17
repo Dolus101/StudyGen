@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { saveQuizAttempt } from '../lib/api';
 import { useSettings } from '../hooks/useSettings';
+import { createThemeColors, createThemedStyles } from '../hooks/useTheme';
 
-const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' };
+const C = createThemeColors({ card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399', red: '#F87171' });
 const LETTERS = ['A', 'B', 'C', 'D'];
 const TEXT_TYPES = ['Identification', 'Fill in the blank'];
 
@@ -266,7 +267,7 @@ export default function QuizTab({ r, onExit }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   muted: { color: C.muted, fontSize: 12, lineHeight: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   h: { color: C.text, fontSize: 16, fontWeight: '700', marginBottom: 2 },
@@ -275,17 +276,17 @@ const s = StyleSheet.create({
 
   countRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
   count: { color: C.text, fontSize: 13, fontWeight: '700' },
-  track: { height: 4, borderRadius: 2, backgroundColor: '#23274D', marginTop: 8, overflow: 'hidden' },
+  track: { height: 4, borderRadius: 2, backgroundColor: C.track, marginTop: 8, overflow: 'hidden' },
   fill: { height: 4, borderRadius: 2, backgroundColor: C.accent },
 
-  qCard: { marginTop: 14, padding: 16, borderRadius: 18, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
+  qCard: { marginTop: 14, padding: 16, borderRadius: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong },
   topicRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   topic: { color: C.accent, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
   qText: { color: C.text, fontSize: 17, fontWeight: '600', lineHeight: 24 },
 
   opt: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 50, borderRadius: 12, paddingHorizontal: 12, backgroundColor: C.card, borderWidth: 1.5, borderColor: C.line },
-  optOn: { borderColor: C.accent, backgroundColor: '#161A45' },
-  letter: { width: 28, height: 28, borderRadius: 8, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center' },
+  optOn: { borderColor: C.accent, backgroundColor: C.softSurface },
+  letter: { width: 28, height: 28, borderRadius: 8, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center' },
   letterText: { color: C.text, fontSize: 12, fontWeight: '700' },
   optText: { flex: 1, color: C.text, fontSize: 14 },
   radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: C.muted, alignItems: 'center', justifyContent: 'center' },
@@ -305,4 +306,4 @@ const s = StyleSheet.create({
 
   result: { alignItems: 'center', gap: 8, paddingVertical: 40 },
   score: { color: C.accent, fontSize: 44, fontWeight: '800' },
-});
+}));

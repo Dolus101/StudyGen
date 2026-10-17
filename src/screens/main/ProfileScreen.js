@@ -1,9 +1,10 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
+import { Pressable, ScrollView, Text, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useReviewers, useProfile } from '../../lib/api';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#080A1C',
   card: '#12152E',
   line: '#1C2044',
@@ -11,7 +12,7 @@ const C = {
   muted: '#8E92B2',
   accent: '#6B6CFF',
   indigo: '#6366F1',
-};
+});
 
 function Item({ icon, title, sub, onPress, last }) {
   return (
@@ -42,7 +43,7 @@ export default function ProfileScreen({ onOpenReviewers, onOpenStats, onOpenSett
           <Text style={s.title}>Profile</Text>
           <Pressable onPress={onOpenSettings} accessibilityRole="button" accessibilityLabel="Settings"
             style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
-            <Ionicons name="settings-outline" size={19} color="#fff" />
+            <Ionicons name="settings-outline" size={19} color={C.accent} />
           </Pressable>
         </View>
 
@@ -90,20 +91,20 @@ export default function ProfileScreen({ onOpenReviewers, onOpenStats, onOpenSett
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { color: C.text, fontSize: 21, fontWeight: '700' },
-  iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
 
-  hero: { marginTop: 18, alignItems: 'center', backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#232859', borderRadius: 18, paddingVertical: 22 },
+  hero: { marginTop: 18, alignItems: 'center', backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, paddingVertical: 22 },
   avatarOuter: { width: 68, height: 68, borderRadius: 34, overflow: 'hidden' },
   avatarImg: { width: 68, height: 68, borderRadius: 34 },
   avatar: { width: 68, height: 68, borderRadius: 34, backgroundColor: C.indigo, alignItems: 'center', justifyContent: 'center' },
   name: { color: C.text, fontSize: 18, fontWeight: '700', marginTop: 12 },
   tag: { color: C.muted, fontSize: 12, marginTop: 4 },
-  edit: { marginTop: 14, paddingHorizontal: 18, height: 30, borderRadius: 8, backgroundColor: '#1A1E4A', alignItems: 'center', justifyContent: 'center' },
+  edit: { marginTop: 14, paddingHorizontal: 18, height: 30, borderRadius: 8, backgroundColor: C.softSurface, alignItems: 'center', justifyContent: 'center' },
   editText: { color: C.accent, fontSize: 12, fontWeight: '600' },
 
   sets: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14, backgroundColor: C.card, borderRadius: 14, padding: 16 },
@@ -114,8 +115,8 @@ const s = StyleSheet.create({
   group: { backgroundColor: C.card, borderRadius: 14, overflow: 'hidden' },
   item: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   itemLine: { borderBottomWidth: 1, borderBottomColor: C.line },
-  itemIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center' },
+  itemIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center' },
   itemTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
 
   footer: { color: C.muted, fontSize: 11, textAlign: 'center', marginTop: 26 },
-});
+}));

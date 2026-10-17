@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { createThemeColors, createThemedStyles } from '../hooks/useTheme';
+
+const C = createThemeColors({ card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', body: '#B4B8D4', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399' });
 
 // Renders **important words** in bold. Built in here so no extra file is needed.
 function RichText({ children, style, boldStyle }) {
@@ -12,7 +15,7 @@ function RichText({ children, style, boldStyle }) {
         const isBold = part.length > 4 && part.startsWith('**') && part.endsWith('**');
         if (isBold) {
           return (
-            <Text key={i} style={[{ fontWeight: '800', color: '#FFFFFF' }, boldStyle]}>
+            <Text key={i} style={[{ fontWeight: '800', color: C.text }, boldStyle]}>
               {part.slice(2, -2)}
             </Text>
           );
@@ -22,8 +25,6 @@ function RichText({ children, style, boldStyle }) {
     </Text>
   );
 }
-
-const C = { card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', body: '#B4B8D4', accent: '#6B6CFF', button: '#5B63F0', green: '#34D399' };
 
 function Node({ icon, label, center }) {
   return (
@@ -84,7 +85,7 @@ export default function NotesTab({ r, chapter = 0, onChapterChange, onMarkReview
         {open && (
           <View style={s.picker}>
             {r.topics.map((t, i) => (
-              <Pressable key={t.id || `${i}-${t.title}`} onPress={() => pick(i)} style={[s.pickRow, i === ch && { backgroundColor: '#1B1F4A' }]}>
+              <Pressable key={t.id || `${i}-${t.title}`} onPress={() => pick(i)} style={[s.pickRow, i === ch && s.pickRowOn]}>
                 <Text style={[s.pickNum, i === ch && { color: C.accent }]}>{String(i + 1).padStart(2, '0')}</Text>
                 <Text style={[s.pickText, i === ch && { fontWeight: '700' }]} numberOfLines={1}>{t.title}</Text>
                 {t.reviewed && <Ionicons name="checkmark-circle" size={16} color={C.green} />}
@@ -155,39 +156,40 @@ export default function NotesTab({ r, chapter = 0, onChapterChange, onMarkReview
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   muted: { color: C.muted, fontSize: 12 },
-  chapter: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
+  chapter: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong },
   badge: { width: 38, height: 38, borderRadius: 10, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   chapterLabel: { color: C.accent, fontSize: 10, fontWeight: '700', letterSpacing: 0.6 },
   chapterTitle: { color: C.text, fontSize: 14, fontWeight: '600', marginTop: 2 },
   picker: { marginTop: 6, borderRadius: 14, backgroundColor: C.card, padding: 6 },
   pickRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11, paddingHorizontal: 10, borderRadius: 10 },
+  pickRowOn: { backgroundColor: C.iconSurface },
   pickNum: { color: C.muted, fontSize: 12, fontWeight: '700', width: 22 },
   pickText: { flex: 1, color: C.text, fontSize: 13 },
 
-  panel: { padding: 16, borderRadius: 18, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
+  panel: { padding: 16, borderRadius: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong },
   panelHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  panelIcon: { width: 32, height: 32, borderRadius: 9, backgroundColor: '#161A45', borderWidth: 1, borderColor: '#262B63', alignItems: 'center', justifyContent: 'center' },
+  panelIcon: { width: 32, height: 32, borderRadius: 9, backgroundColor: C.iconSurface, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   panelTitle: { color: C.text, fontSize: 15, fontWeight: '700' },
 
   bullet: { flexDirection: 'row', gap: 10 },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: C.accent, marginTop: 7 },
   bulletText: { flex: 1, color: C.body, fontSize: 13, lineHeight: 19 },
 
-  callout: { marginTop: 16, padding: 12, borderRadius: 10, backgroundColor: '#141945', borderLeftWidth: 3, borderLeftColor: C.accent, gap: 4 },
+  callout: { marginTop: 16, padding: 12, borderRadius: 10, backgroundColor: C.softSurface, borderLeftWidth: 3, borderLeftColor: C.accent, gap: 4 },
   calloutLabel: { color: C.accent, fontSize: 10, fontWeight: '700', letterSpacing: 0.8 },
 
   diagramTitle: { color: C.text, fontSize: 13, fontWeight: '500', marginTop: 14 },
-  diagram: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 14, padding: 14, borderRadius: 14, backgroundColor: '#0A0D26', borderWidth: 1, borderColor: C.line },
+  diagram: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 14, padding: 14, borderRadius: 14, backgroundColor: C.field, borderWidth: 1, borderColor: C.line },
   nodeWrap: { width: 70, alignItems: 'center', gap: 6 },
-  node: { width: 56, height: 56, borderRadius: 14, backgroundColor: '#151A4A', borderWidth: 1, borderColor: '#3A3FA8', alignItems: 'center', justifyContent: 'center' },
+  node: { width: 56, height: 56, borderRadius: 14, backgroundColor: C.iconSurface, borderWidth: 1, borderColor: C.accent, alignItems: 'center', justifyContent: 'center' },
   nodeCenter: { width: 44, height: 44, borderRadius: 22, marginTop: 6, backgroundColor: C.button, borderColor: C.button },
   nodeLabel: { color: C.muted, fontSize: 10, textAlign: 'center' },
-  line: { flex: 1, height: 2, backgroundColor: '#3A3FA8', marginTop: 27 },
+  line: { flex: 1, height: 2, backgroundColor: C.accent, marginTop: 27 },
 
   reviewBtn: { flexDirection: 'row', gap: 8, height: 48, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
   reviewDone: { backgroundColor: 'rgba(52,211,153,0.12)' },
   reviewText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-});
+}));

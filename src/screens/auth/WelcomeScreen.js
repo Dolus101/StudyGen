@@ -1,7 +1,8 @@
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = {
+const C = createThemeColors({
   bg: '#0A0A1F',
   panel: '#212857',
   purple: '#7B6CF6',
@@ -10,7 +11,7 @@ const C = {
   button: '#5B6CFF',
   text: '#FFFFFF',
   muted: '#9A9DB8',
-};
+});
 
 function DocCard({ size, color, style }) {
   const pad = size * 0.15;
@@ -114,7 +115,7 @@ export default function WelcomeScreen({ onGetStarted }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles(() => ({
   safe: { flex: 1, backgroundColor: C.bg },
   container: { flex: 1, paddingHorizontal: 24, paddingBottom: 56 },
   brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 36 },
@@ -128,4 +129,4 @@ const s = StyleSheet.create({
   cta: { backgroundColor: C.button, borderRadius: 12, height: 48, alignItems: 'center', justifyContent: 'center' },
   ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   footer: { color: C.muted, fontSize: 11, textAlign: 'center', marginTop: 14 },
-});
+}));

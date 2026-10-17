@@ -1,7 +1,8 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { createThemeColors, createThemedStyles } from '../hooks/useTheme';
 
-const C = { text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0' };
+const C = createThemeColors({ text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0' });
 
 export function Loading() {
   return (
@@ -44,12 +45,12 @@ export function ErrorState({ message, onRetry }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   center: { paddingVertical: 40, alignItems: 'center' },
-  card: { alignItems: 'center', padding: 22, borderRadius: 18, backgroundColor: '#0F1230', borderWidth: 1, borderColor: '#262B63' },
-  icon: { width: 56, height: 56, borderRadius: 16, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
+  card: { alignItems: 'center', padding: 22, borderRadius: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
+  icon: { width: 56, height: 56, borderRadius: 16, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   title: { color: C.text, fontSize: 16, fontWeight: '700', textAlign: 'center' },
   text: { color: C.muted, fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 6 },
   btn: { marginTop: 16, height: 44, paddingHorizontal: 22, borderRadius: 12, backgroundColor: C.button, alignItems: 'center', justifyContent: 'center' },
   btnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-});
+}));

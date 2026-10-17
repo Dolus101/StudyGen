@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Modal, Platform, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { cancelStudyReminder, useStudyReminder } from '../../hooks/useStudyReminder';
 import { useSettings } from '../../hooks/useSettings';
+import { createThemeColors, createThemedStyles } from '../../hooks/useTheme';
 
-const C = { bg: '#080A1C', card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', red: '#F4707F' };
+const C = createThemeColors({ bg: '#080A1C', card: '#12152E', line: '#1C2044', text: '#FFFFFF', muted: '#8E92B2', accent: '#6B6CFF', button: '#5B63F0', red: '#F4707F' });
 
 function Row({ icon, title, sub, value, onPress, right, color }) {
   return (
@@ -26,7 +27,7 @@ function Row({ icon, title, sub, value, onPress, right, color }) {
 }
 
 function Toggle({ value, onValueChange }) {
-  return <Switch value={value} onValueChange={onValueChange} trackColor={{ false: '#2A2E55', true: C.button }} thumbColor="#fff" />;
+  return <Switch value={value} onValueChange={onValueChange} trackColor={{ false: C.trackOff, true: C.button }} thumbColor="#fff" />;
 }
 
 function toDate({ hour, minute }) {
@@ -36,7 +37,7 @@ function toDate({ hour, minute }) {
 }
 
 export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) {
-  const { shuffle, explain, update } = useSettings();
+  const { shuffle, explain, theme, update } = useSettings();
 
   // Study reminder (local notification)
   const { enabled: remind, time, toggle: setRemind, changeTime } = useStudyReminder();
@@ -55,16 +56,24 @@ export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) 
     onSignOut?.();
   };
 
+  const chooseTheme = () => {
+    Alert.alert('Choose theme', undefined, [
+      { text: 'Dark', onPress: () => update({ theme: 'dark' }) },
+      { text: 'Light', onPress: () => update({ theme: 'light' }) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
+
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
         <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Go back"
           style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.7 }]}>
-          <Ionicons name="chevron-back" size={20} color="#fff" />
+          <Ionicons name="chevron-back" size={20} color={C.text} />
         </Pressable>
         <Text style={s.title}>Settings</Text>
         <View style={s.iconBtn}>
-          <Ionicons name="settings-outline" size={19} color="#fff" />
+          <Ionicons name="settings-outline" size={19} color={C.text} />
         </View>
       </View>
 
@@ -97,7 +106,7 @@ export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) 
 
         <Text style={s.section}>Appearance</Text>
         <View style={s.group}>
-          <Row icon="moon-outline" title="Theme" value="Dark" right="chevron" onPress={() => {}} />
+          <Row icon={theme === 'light' ? 'sunny-outline' : 'moon-outline'} title="Theme" value={theme === 'light' ? 'Light' : 'Dark'} right="chevron" onPress={chooseTheme} />
         </View>
 
         <Text style={s.section}>Account</Text>
@@ -147,8 +156,8 @@ export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) 
               mode="time"
               value={draftTime}
               display="spinner"
-              themeVariant="dark"
-              textColor="#fff"
+              themeVariant={theme === 'light' ? 'light' : 'dark'}
+              textColor={C.text}
               onChange={(_, date) => date && setDraftTime(date)}
             />
           </View>
@@ -158,17 +167,17 @@ export default function SettingsScreen({ onBack, onSignOut, onChangePassword }) 
   );
 }
 
-const s = StyleSheet.create({
+const s = createThemedStyles((C) => ({
   safe: { flex: 1, backgroundColor: C.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14 },
   title: { color: C.text, fontSize: 17, fontWeight: '700' },
-  iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#151833', borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: C.surfaceAlt, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 28 },
   lead: { color: C.muted, fontSize: 12 },
   section: { color: C.text, fontSize: 14, fontWeight: '700', marginTop: 22, marginBottom: 10 },
   group: { gap: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, backgroundColor: C.card },
-  icon: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#1B1F4A', alignItems: 'center', justifyContent: 'center' },
+  icon: { width: 34, height: 34, borderRadius: 10, backgroundColor: C.iconSurface, alignItems: 'center', justifyContent: 'center' },
   rowTitle: { color: C.text, fontSize: 14, fontWeight: '500' },
   rowSub: { color: C.muted, fontSize: 11, marginTop: 2 },
   value: { color: C.muted, fontSize: 12 },
@@ -181,4 +190,4 @@ const s = StyleSheet.create({
   sheetTitle: { color: C.text, fontSize: 15, fontWeight: '700' },
   sheetCancel: { color: C.muted, fontSize: 15 },
   sheetDone: { color: C.accent, fontSize: 15, fontWeight: '700' },
-});
+}));
